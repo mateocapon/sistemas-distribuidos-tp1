@@ -1,0 +1,41 @@
+version: '3.9'
+name: tp1
+services:
+  client:
+    container_name: client
+    image: client:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=DEBUG
+      - CITIES=montreal,toronto,washington
+    volumes:
+      - ./client/config.yaml:/config.yaml
+      # - ./.data/$FILES_PATH/montreal/trips.csv:/montreal-trips.csv
+      # - ./.data/$FILES_PATH/toronto/trips.csv:/toronto-trips.csv
+      # - ./.data/$FILES_PATH/washington/trips.csv:/washington-trips.csv
+    networks:
+      - testing_net
+    depends_on:
+      - server
+      
+  server:
+    container_name: server
+    image: server:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=DEBUG
+    volumes:
+      - ./server/config.ini:/config.ini
+    networks:
+      - testing_net
+
+
+networks:
+  testing_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.125.0/24
+
