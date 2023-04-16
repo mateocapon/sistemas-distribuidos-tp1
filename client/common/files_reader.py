@@ -14,7 +14,6 @@ def files_reader(cities_queue, server_addr, monitoring_queue,
         file_path = city + "-trips.csv"
         working = reader.process_file(file_path)
 
-
 class FilesReader:
     def __init__(self, server_addr, monitoring_queue, chunk_size, max_package_size):
         self.monitoring_queue = monitoring_queue

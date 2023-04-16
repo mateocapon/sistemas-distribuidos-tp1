@@ -26,6 +26,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=DEBUG
+      - N_CITIES=3
     volumes:
       - ./server/config.ini:/config.ini
     networks:
