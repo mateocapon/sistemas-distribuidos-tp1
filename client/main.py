@@ -31,8 +31,10 @@ def initialize_config():
         config_params["server_ip"] = os.getenv('SERVER_IP', config["DEFAULT"]["SERVER_IP"])
         config_params["server_port"] = int(os.getenv('SERVER_PORT', config["DEFAULT"]["SERVER_PORT"]))
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["cities"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["CITIES"])
+        config_params["cities"] = os.getenv('CITIES', config["DEFAULT"]["CITIES"])
         config_params["number_readers"] = int(os.getenv('NUMBER_READERS', config["DEFAULT"]["NUMBER_READERS"]))
+        config_params["chunk_size"] = int(os.getenv('CHUNK_SIZE', config["DEFAULT"]["CHUNK_SIZE"]))
+        config_params["max_package_size"] = int(os.getenv('MAX_PACKAGE_SIZE', config["DEFAULT"]["MAX_PACKAGE_SIZE"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting client".format(e))
     except ValueError as e:
@@ -48,6 +50,8 @@ def main():
     logging_level = config_params["logging_level"]
     cities = config_params["cities"]
     number_readers = config_params["number_readers"]
+    max_package_size = config_params["number_readers"]
+    chunk_size = config_params["number_readers"]
 
     initialize_log(logging_level)
 
@@ -55,11 +59,13 @@ def main():
     # of the component
     logging.debug(f"action: config | result: success | server_ip: {server_ip} | " 
                   f"server_port: {server_port} | logging_level: {logging_level} | "
+                  f"chunk_size: {chunk_size} | max_package_size: {max_package_size} | "
                   f"number_readers: {number_readers} | cities: {cities}")
 
     #try:
-    client = Client(server_ip, server_port)
-    client.run(number_readers, cities.split(','))
+    client = Client(server_ip, server_port, number_readers, cities.split(','), 
+                    chunk_size, max_package_size)
+    client.run()
     #except:
     #    logging.error(f'action: run_client | result: fail | error: unknown')
 

@@ -10,10 +10,10 @@ services:
       - LOGGING_LEVEL=DEBUG
       - CITIES=montreal,toronto,washington
     volumes:
-      - ./client/config.yaml:/config.yaml
-      # - ./.data/$FILES_PATH/montreal/trips.csv:/montreal-trips.csv
-      # - ./.data/$FILES_PATH/toronto/trips.csv:/toronto-trips.csv
-      # - ./.data/$FILES_PATH/washington/trips.csv:/washington-trips.csv
+      - ./client/config.ini:/config.ini
+      - ./.data/$FILES_PATH/montreal/trips.csv:/montreal-trips.csv
+      - ./.data/$FILES_PATH/toronto/trips.csv:/toronto-trips.csv
+      - ./.data/$FILES_PATH/washington/trips.csv:/washington-trips.csv
     networks:
       - testing_net
     depends_on:

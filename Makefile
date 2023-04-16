@@ -9,14 +9,29 @@ docker-image:
 .PHONY: docker-image
 
 docker-compose-up: docker-image
-	docker compose --env-file .env.dev -f docker-compose-dev.yaml up -d --build
+	docker compose --env-file .env.dev -f docker-compose.yaml up -d --build
 .PHONY: docker-compose-up
 
 docker-compose-down:
-	docker compose -f docker-compose-dev.yaml stop -t 1
-	docker compose -f docker-compose-dev.yaml down
+	docker compose --env-file .env.dev -f docker-compose.yaml stop -t 1
+	docker compose --env-file .env.dev -f docker-compose.yaml down
 .PHONY: docker-compose-down
 
 docker-compose-logs:
-	docker compose -f docker-compose-dev.yaml logs -f
+	docker compose --env-file .env.dev -f docker-compose.yaml logs -f
 .PHONY: docker-compose-logs
+
+docker-compose-prod-up: docker-image
+	docker compose --env-file .env.prod -f docker-compose.yaml up -d --build
+.PHONY: docker-compose-up
+
+docker-compose-prod-down:
+	docker compose --env-file .env.prod -f docker-compose.yaml stop -t 1
+	docker compose --env-file .env.prod -f docker-compose.yaml down
+.PHONY: docker-compose-down
+
+docker-compose-prod-logs:
+	docker compose --env-file .env.prod -f docker-compose.yaml logs -f
+.PHONY: docker-compose-logs
+
+
