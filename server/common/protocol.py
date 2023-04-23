@@ -6,7 +6,7 @@ TYPE_POS = 0
 STATIONS_CHUNK = b'S'
 
 class Protocol:
-    
+
     def forward_chunk(self, client_sock, chunk_id):
         size_chunk = self.__receive_uint16(client_sock)
         data = self.__recvall(client_sock, size_chunk)

@@ -51,7 +51,7 @@ def main():
     cities = config_params["cities"]
     number_readers = config_params["number_readers"]
     max_package_size = config_params["max_package_size"]
-    chunk_size = config_params["number_readers"]
+    chunk_size = config_params["chunk_size"]
 
     initialize_log(logging_level)
 

@@ -8,7 +8,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=DEBUG
-      - CITIES=montreal,toronto,washington
+      - CITIES=montreal
     volumes:
       - ./client/config.ini:/config.ini
       - ./.data/dev:/data
@@ -24,7 +24,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=DEBUG
-      - N_CITIES=3
+      - N_CITIES=1
     volumes:
       - ./server/config.ini:/config.ini
     networks:

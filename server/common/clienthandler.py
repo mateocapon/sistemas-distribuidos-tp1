@@ -24,7 +24,7 @@ class ClientHandler:
                     server_working = False
                     self._clients_queue.close()
                     break
-                self._receive_chunks(STATIONS_CHUNK, client_sock)
+                self._receive_chunks(STATIONS_CHUNK[0], client_sock)
                 # self._receive_chunks(WEATHER_CHUNK)
                 # self._receive_chunks(TRIPS_CHUNK)
             except OSError as e:
@@ -36,6 +36,8 @@ class ClientHandler:
     def _receive_chunks(self, type_chunk, client_sock):
         chunk_id = 0
         status = type_chunk
+        logging.info(f"El status vale, {status}")
         while status == type_chunk:
             status = self._protocol.forward_chunk(client_sock, chunk_id)
             chunk_id += 1
+        logging.info(f"Recibo el ultimo del chunk, {status}")

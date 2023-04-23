@@ -15,6 +15,7 @@ class Protocol:
         self.__send_chunk(socket, city, stations, CHUNK_STATIONS)
 
     def send_last_chunk(self, socket, city, stations: list[Station]):
+        logging.info("mando last chunk")
         self.__send_chunk(socket, city, stations, LAST_CHUNK_STATIONS)
 
     def __send_chunk(self, socket, city, stations, type_msg):

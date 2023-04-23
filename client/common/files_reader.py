@@ -43,13 +43,14 @@ class FilesReader:
         for station in self.__load_stations(file_path):
             stations.append(station)
             if len(stations) == self._chunk_size:
-                self._protocol.send_chunk(self._skt, stations)
+                self._protocol.send_chunk(self._skt, city, stations)
                 stations = []
         self._protocol.send_last_chunk(self._skt, city, stations)
 
     def __load_stations(self, file_path) -> list[Station]:
         with open(file_path, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            next(reader) # read the header
             for row in reader:
                 yield Station(row[0], row[1], row[2], row[3], row[4])
 
@@ -57,6 +58,7 @@ class FilesReader:
     def __load_weather(self, file_path) -> list[Weather]:
         with open(file_path, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            next(reader) # read the header
             for row in reader:
                 yield Weather(row[0], row[1], row[2], row[3], row[4])
 
