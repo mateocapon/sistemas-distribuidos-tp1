@@ -3,8 +3,6 @@ import logging
 import signal
 import multiprocessing as mp
 from common.clienthandler import handle_client_connection
-from common.bets_loaded_counter import count_loaded_bets
-from common.clienthandler import JUST_ARRIVED
 
 class Server:
     def __init__(self, port, listen_backlog, n_workers, n_cities):
@@ -12,12 +10,12 @@ class Server:
         self._server_socket.bind(('', port))
         self._server_socket.listen(listen_backlog)
         self._server_active = True
-        self._n_workers = n_workers
+        self._n_workers = min(n_workers, n_cities)
         self._n_cities = n_cities
         self._clients_accepted_queue = mp.Queue()
         self._workers = [mp.Process(target=handle_client_connection, 
-                                    args=(self._clients_accepted_queue)
-                                    ) for i in range(n_workers)]
+                                    args=(self._clients_accepted_queue,))
+                        for i in range(self._n_workers)]
         signal.signal(signal.SIGTERM, self.__stop_accepting)
 
     def run(self):
@@ -28,15 +26,14 @@ class Server:
             for city in range(self._n_cities):
                 client_sock = self.__accept_new_connection()
                 if client_sock:
-                    self._clients_accepted_queue.put((client_sock, JUST_ARRIVED))
-                elif self._server_active:
-                    self.__stop_accepting()
-            # self.__accept_new_connection()
-            # lo meto en un while para enviar el resultado final.
+                    self._clients_accepted_queue.put((client_sock, None))
+                else:
+                    break
         except ValueError:
             logging.info(f'action: put_client | result: fail')
         finally:
-            logging.info(f'action: join_processes | result: in_progress')            
+            logging.info(f'action: join_processes | result: in_progress')
+            [self._clients_accepted_queue.put((None, i)) for i in range(self._n_workers)]           
             for worker in self._workers:
                 worker.join()
             self._server_socket.close()
@@ -69,12 +66,6 @@ class Server:
         self._server_active = False
         try:
             self._server_socket.shutdown(socket.SHUT_WR)
-            # self._load_bets_queue.put(None)
-            # self._waiting_winner_queue.put(None)
-
-            # self._clients_accepted_queue.close()
-            # self._load_bets_queue.close()
-            # self._waiting_winner_queue.close()
             logging.info('action: stop_server | result: success')
         except OSError as e:
             logging.error(f'action: stop_server | result: fail | error: {e}')

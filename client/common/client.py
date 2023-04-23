@@ -19,19 +19,14 @@ class Client:
         # Improvement: make each process read chunks and not
         # the entire file to make the load distribution between processes more even.
         self._n_readers = min(len(cities), n_readers)
-        self._files_to_process = mp.Queue()
-        [self._files_to_process.put(city) for city in cities]
+        self._cities_queue = mp.Queue()
+        [self._cities_queue.put(city) for city in cities]
         # Tell all workers to stop processing.
-        [self._files_to_process.put(None) for i in range(self._n_readers)]
-
-        # Main Process is the consumer, and workers are the producers.
-        # Main Process will log the status of each file.
-        self._monitoring_queue = mp.Queue()
+        [self._cities_queue.put(None) for i in range(self._n_readers)]
 
         self._workers = [mp.Process(target=files_reader, 
-                                    args=(self._files_to_process, 
+                                    args=(self._cities_queue, 
                                           self._server_addr,
-                                          self._monitoring_queue, 
                                           self._chunk_size,
                                           self._max_package_size)) 
                                     for i in range(self._n_readers)]
@@ -45,16 +40,9 @@ class Client:
         for worker in self._workers:
             worker.daemon = True
             worker.start()
-        
-        while (self.client_active):
-            self.__monitor_results()
-            time.sleep(1)
-        logging.debug("termina el cliente")
 
-
-    def __monitor_results(self):
-    	logging.debug("mensaje de monitor")
-
+        for worker in self._workers:
+            worker.join()
 
     def __stop_client(self, *args):
         logging.debug("Stop client")
