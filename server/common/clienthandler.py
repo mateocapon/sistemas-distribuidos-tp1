@@ -2,12 +2,11 @@ import socket
 import logging
 import queue
 from common.protocol import Protocol
-from common.protocol import STATIONS_CHUNK
+from common.protocol import CHUNK_STATIONS, CHUNK_WEATHER, CHUNK_TRIPS
 
 def handle_client_connection(clients_queue):
     client_handler = ClientHandler(clients_queue)
     client_handler.run()
-
 
 
 class ClientHandler:
@@ -24,16 +23,16 @@ class ClientHandler:
                     server_working = False
                     self._clients_queue.close()
                     break
-                self._receive_chunks(STATIONS_CHUNK[0], client_sock)
-                # self._receive_chunks(WEATHER_CHUNK)
-                # self._receive_chunks(TRIPS_CHUNK)
+                self.__receive_chunks(CHUNK_STATIONS[0], client_sock)
+                self.__receive_chunks(CHUNK_WEATHER[0], client_sock)
+                self.__receive_chunks(CHUNK_TRIPS[0], client_sock)
             except OSError as e:
                 logging.error(f'action: receive_message | result: fail | error: {e}')
             finally:
                 if client_sock:
                     client_sock.close()
 
-    def _receive_chunks(self, type_chunk, client_sock):
+    def __receive_chunks(self, type_chunk, client_sock):
         chunk_id = 0
         status = type_chunk
         logging.info(f"El status vale, {status}")
