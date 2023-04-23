@@ -1,5 +1,6 @@
 import socket
 import logging
+import pika
 
 UINT16_SIZE = 2
 TYPE_POS = 0
@@ -8,10 +9,20 @@ CHUNK_WEATHER = b'W'
 CHUNK_TRIPS = b'T'
 
 class Protocol:
+    def __init__(self):
+        self._connection = pika.BlockingConnection(
+                                pika.ConnectionParameters(host='rabbitmq'))
+        self._channel = self._connection.channel()
+        self._channel.queue_declare(queue='task_queue')
+
 
     def forward_chunk(self, client_sock, chunk_id):
         size_chunk = self.__receive_uint16(client_sock)
         data = self.__recvall(client_sock, size_chunk)
+        self._channel.basic_publish(
+            exchange='',
+            routing_key='task_queue',
+            body=data)
         return data[TYPE_POS]
 
     def __receive_uint16(self, client_sock):
@@ -30,4 +41,6 @@ class Protocol:
             data += received
         return data
 
+    def __del__(self):
+        self._connection.close()
     

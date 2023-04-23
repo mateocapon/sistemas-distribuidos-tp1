@@ -1,6 +1,20 @@
 version: '3.9'
 name: tp1
 services:
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      dockerfile: rabbitmq.dockerfile
+    ports:
+      - 15672:15672
+    networks:
+      - testing_net
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        interval: 10s
+        timeout: 5s
+        retries: 10
+
   client:
     container_name: client
     image: client:latest
@@ -23,13 +37,25 @@ services:
     entrypoint: python3 /main.py
     environment:
       - PYTHONUNBUFFERED=1
-      - LOGGING_LEVEL=DEBUG
+      - LOGGING_LEVEL=INFO
       - N_CITIES=1
     volumes:
       - ./server/config.ini:/config.ini
     networks:
       - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
+  packet_distributor:
+    container_name: packet_distributor
+    image: packet_distributor:latest
+    entrypoint: python3 /main.py
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
 networks:
   testing_net:
