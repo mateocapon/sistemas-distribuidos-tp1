@@ -1,7 +1,9 @@
 docker-image:
+	docker build -f ./base-images/python-base.dockerfile -t rabbitmq-python-base:0.0.1 .
 	docker build -f ./server/Dockerfile -t "server:latest" .
 	docker build -f ./client/Dockerfile -t "client:latest" .
-	docker build -f ./packet-distributor/Dockerfile -t "packet_distributor:latest" .
+	docker build -f ./packet-distributor/Dockerfile -t "packet-distributor:latest" .
+	docker build -f ./pipeline-average-time-weather/weather-filter/Dockerfile -t "weather-filter:latest" .
 	# Execute this command from time to time to clean up intermediate stages generated 
 	# during client build (your hard drive will like this :) ). Don't left uncommented if you 
 	# want to avoid rebuilding client image every time the docker-compose-up command 

@@ -6,7 +6,9 @@ INT32_SIZE = 4
 SCALE_FLOAT = 1000
 
 # YYYY-MM-DD HH:MM:SS
-DATE_LEN = 19
+DATE_TRIP_LEN = 19
+# YYYY-MM-DD
+DATE_WEATHER_LEN = 10
 
 CHUNK_STATIONS = b'S'
 LAST_CHUNK_STATIONS = b'A'
@@ -57,7 +59,7 @@ class Protocol:
         payload += type_msg
         payload += self.__encode_string(city)
         for weatherday in weather:
-            payload += self.__encode_string(weatherday.date)
+            payload += self.__encode_date(weatherday.date, DATE_WEATHER_LEN)
             payload += self.__encode_float(weatherday.prectot)
             payload += self.__encode_float(weatherday.qv2m)
             payload += self.__encode_float(weatherday.rh2m)
@@ -96,9 +98,9 @@ class Protocol:
         payload += type_msg
         payload += self.__encode_string(city)
         for trip in trips:
-            payload += self.__encode_date(trip.start_date)
+            payload += self.__encode_date(trip.start_date, DATE_TRIP_LEN)
             payload += self.__encode_uint16(trip.start_station_code)
-            payload += self.__encode_date(trip.end_date)
+            payload += self.__encode_date(trip.end_date, DATE_TRIP_LEN)
             payload += self.__encode_uint16(trip.end_station_code)
             payload += self.__encode_float(trip.duration_sec)
             payload += self.__encode_uint16(trip.is_member)
@@ -114,10 +116,11 @@ class Protocol:
         size = len(encoded).to_bytes(UINT16_SIZE, "big")
         return size + encoded
 
-    def __encode_date(self, to_encode):
-        if len(to_encode) != DATE_LEN:
+    def __encode_date(self, to_encode, type_date):
+        encoded = to_encode.encode('utf-8')
+        if len(encoded) != type_date:
             raise ValueError(f"Date to encode has invalid size: {to_encode}")
-        return to_encode.encode('utf-8')
+        return encoded
 
     def __encode_float(self, to_encode):
         return int(to_encode * SCALE_FLOAT).to_bytes(INT32_SIZE, "big", signed = True)

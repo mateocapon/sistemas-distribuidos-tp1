@@ -48,9 +48,40 @@ services:
         condition: service_healthy
 
   packet_distributor:
-    container_name: packet_distributor
-    image: packet_distributor:latest
+    container_name: packet-distributor
+    image: packet-distributor:latest
     entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  weather-filter-1:
+    container_name: weather-filter-1
+    image: weather-filter:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - CITIES=montreal
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  weather-filter-2:
+    container_name: weather-filter-2
+    image: weather-filter:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - CITIES=montreal
     networks:
       - testing_net
     depends_on:

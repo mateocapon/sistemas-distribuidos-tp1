@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.packet_distributor import PacketDistributor
+from common.weatherfilter import WeatherFilter
 import logging
 import os
 
@@ -27,6 +27,8 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
+        config_params["city"] = os.getenv('CITY', config["DEFAULT"]["CITY"])
+        config_params["prectot_cond"] = int(os.getenv('PRECTOT_COND', config["DEFAULT"]["PRECTOT_COND"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -38,15 +40,18 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-
+    city = config_params["city"]
+    prectot_cond = config_params["prectot_cond"]
+    
     initialize_log(logging_level)
 
     # Log config parameters at the beginning of the program to verify the configuration
     # of the component
-    logging.debug(f"action: config | result: success | logging_level: {logging_level}")
+    logging.debug(f"action: config | result: success | logging_level: {logging_level} |"
+                  f"city: {city} | prectot_cond: {prectot_cond}")
 
     try:
-        distributor = PacketDistributor()
+        distributor = WeatherFilter(city, prectot_cond)
         distributor.run()
     except OSError as e:
         logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
