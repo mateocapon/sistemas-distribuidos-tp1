@@ -1,19 +1,23 @@
 import pika
 import logging
 import time
+import datetime
 
-NUMBER_CHUNK_POS = 1
+NUMBER_CHUNK_POS = 0
 NUMBER_CHUNK_SIZE = 4
 
 # YYYY-MM-DD
 DATE_WEATHER_LEN = 10
+DATE_TRIP_LEN = 10
 FLOAT_ENCODED_LEN = 4
 
 WEATHER_IMPORTANT_DATA_LEN = DATE_WEATHER_LEN + FLOAT_ENCODED_LEN
 
+TRIP_DATA_LEN = 14
+
 DATE_POS = 0
 PRECTOT_POS = 1
-TYPE_POS = 0
+TYPE_POS = 4
 TYPE_SIZE = 1
 
 SCALE_FLOAT = 1000
@@ -27,51 +31,90 @@ class WeatherFilter:
                                 pika.ConnectionParameters(host='rabbitmq'))
         self._channel = self._connection.channel()
 
+        # weather registries
         self._channel.exchange_declare(exchange='weather_registries', exchange_type='direct')
-
         result = self._channel.queue_declare(queue='', durable=True)
-        self._queue_name = result.method.queue
-    
+        self._weather_queue_name = result.method.queue
         self._channel.queue_bind(
-            exchange='weather_registries', queue=self._queue_name, routing_key=city)
+            exchange='weather_registries', queue=self._weather_queue_name, routing_key=city)
+
+        # trips registries
+        self._channel.exchange_declare(exchange='trips_pipeline_average_time_weather', exchange_type='direct')
+        result = self._channel.queue_declare(queue=city, durable=True)
+        self._trips_queue_name = result.method.queue
+        self._channel.queue_bind(
+            exchange='trips_pipeline_average_time_weather', queue=self._trips_queue_name, routing_key=city)
+
         self._chunks_received = 0
         self._last_chunk_number = -1
         self._prectot_cond = prectot_cond * SCALE_FLOAT
         self._weather_registries = set()
 
+
     def run(self):
-        self._channel.basic_consume(queue=self._queue_name, 
-                                    on_message_callback=self.__callback, auto_ack=True)
+        self._channel.basic_consume(queue=self._weather_queue_name, 
+                                    on_message_callback=self.__weather_callback, auto_ack=True)
         self._channel.start_consuming()
         logging.info(f"Termine de consumir stations")
 
-    def __callback(self, ch, method, properties, body):
-        weather_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE- 1:]
-        weather_per_day = [weather_data[i:i+WEATHER_IMPORTANT_DATA_LEN]
-                           for i in range(0, len(weather_data), WEATHER_IMPORTANT_DATA_LEN)]
- 
-        days_to_insert = map(lambda x: x[DATE_POS],
-                            filter(self.__prectot_condition,
-                                map(self.__split_bytes, weather_per_day)))
+        self._channel.basic_consume(queue=self._trips_queue_name, 
+                                    on_message_callback=self.__trips_callback, auto_ack=True)
+        self._channel.start_consuming()
 
-        self._weather_registries.update(days_to_insert)
+    def __weather_callback(self, ch, method, properties, body):
+        weather_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
+        logging.info(f"weather_data: {weather_data}")
+        weather_per_day = [(weather_data[i:i+DATE_WEATHER_LEN], 
+                            weather_data[i+DATE_WEATHER_LEN:i+WEATHER_IMPORTANT_DATA_LEN])
+                           for i in range(0, len(weather_data), WEATHER_IMPORTANT_DATA_LEN)]
+
+        dates_to_insert = map(self.__to_datetime,
+                            filter(self.__prectot_condition, weather_per_day))
+
+        self._weather_registries.update(dates_to_insert)
         
         if body[TYPE_POS] == LAST_CHUNK_WEATHER[0]:
             chunk_id = self.__decode_uint32(body[NUMBER_CHUNK_POS:NUMBER_CHUNK_POS+NUMBER_CHUNK_SIZE])
             self._last_chunk_number = chunk_id
         self._chunks_received += 1
-        logging.info(f"received: {self._chunks_received} | last: {self._last_chunk_number}")
-        if self._chunks_received == self._last_chunk_number:
+        logging.info(f"consumo {self._chunks_received}  {self._last_chunk_number}   {body[TYPE_POS]}   {LAST_CHUNK_WEATHER[0]}")
+        if self._chunks_received - 1 == self._last_chunk_number:
             logging.info("Llego el ultimo")
+            self._channel.stop_consuming()
+
+
+    def __trips_callback(self, ch, method, properties, body):
+        trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
+        divided_trips = [(trips_data[i:i+DATE_TRIP_LEN], trips_data[i+DATE_TRIP_LEN:i+TRIP_DATA_LEN])
+                           for i in range(0, len(trips_data), TRIP_DATA_LEN)]
+        for trip in divided_trips:
+            date = datetime.date.fromisoformat(trip[DATE_POS].decode('utf-8')) 
+            if date in self._weather_registries:
+                logging.info(f"Encontre uno que esta: {date}, {trip}")
+
+
+
+        chunk_id = self.__decode_uint32(body[NUMBER_CHUNK_POS:NUMBER_CHUNK_POS+NUMBER_CHUNK_SIZE])
+
+
+
+        logging.info(f"recibo el id {chunk_id}")
 
     def __decode_uint32(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
 
-    def __split_bytes(self, item):
+    def __split_weather_bytes(self, item):
         return item[:DATE_WEATHER_LEN], item[DATE_WEATHER_LEN:]
 
     def __prectot_condition(self, item):
         return self.__decode_int32(item[PRECTOT_POS]) > self._prectot_cond
+
+
+    def __to_datetime(self, item):
+        date = item[DATE_POS].decode('utf-8')
+        # data registry is one day late.
+        return datetime.date.fromisoformat(date) - datetime.timedelta(days=1)
+
 
     def __decode_int32(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big', signed=True)

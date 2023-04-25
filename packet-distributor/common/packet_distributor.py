@@ -40,6 +40,14 @@ WEATHER_DATA_LEN = 88
 
 WEATHER_IMPORTANT_DATA_LEN = DATE_WEATHER_LEN + FLOAT_ENCODED_LEN
 
+
+TRIP_DATA_LEN = 50
+START_DATE_TRIP_POS = 0
+START_DATE_TRIP_LEN = 10
+
+DURATION_TRIP_POS = 42
+DURATION_TRIP_LEN = 4
+
 class PacketDistributor:
     def __init__(self):
         # init queue to consume
@@ -51,12 +59,18 @@ class PacketDistributor:
         # init weather exchange to produce
         self._channel.exchange_declare(exchange='weather_registries', exchange_type='direct')
 
+        # init trips exchange for the average time pipeline
+        self._channel.exchange_declare(exchange='trips_pipeline_average_time_weather', exchange_type='direct')
+
+
 
     def run(self):
         self._channel.basic_qos(prefetch_count=1)
         self._channel.basic_consume(queue='task_queue', on_message_callback=self.__callback)
-
         self._channel.start_consuming()
+
+
+
 
     def __callback(self, ch, method, properties, body):
         type_action = body[TYPE_POS]
@@ -64,21 +78,27 @@ class PacketDistributor:
         if self.__is_trip(type_action):
             self.__process_trips_chunk(body)
         elif self.__is_weather(type_action):
-            self.__process_weather_chunk(body, type_action)
+            self.__process_weather_chunk(body)
         elif self.__is_station(type_action):
             self.__process_stations_chunk(body)
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
     def __process_trips_chunk(self, chunk):
-        logging.debug(f"TODO")
+        header = chunk[NUMBER_CHUNK_POS: UINT32_SIZE + TYPE_SIZE]
+        city = self.__decode_city(chunk)
+        start_trips_data = UINT32_SIZE + TYPE_SIZE +  UINT16_SIZE + len(city)
+        trips_data = chunk[start_trips_data:]
+        filtered_day_duration = self.__filter_day_duration(trips_data)
+        logging.info(f"mando chunk de trips {header+filtered_day_duration}")
+        self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
+                                    routing_key=city, body=header+filtered_day_duration)
 
     def __process_stations_chunk(self, chunk):
         logging.debug(f"TODO")
 
-    def __process_weather_chunk(self, chunk, type_action):
-        logging.info(f"EN WEATHER")
-        chunk_id = chunk[NUMBER_CHUNK_POS: UINT32_SIZE]
+    def __process_weather_chunk(self, chunk):
+        header = chunk[NUMBER_CHUNK_POS: UINT32_SIZE + TYPE_SIZE]
         city = self.__decode_city(chunk)
         start_weather_data = UINT32_SIZE + TYPE_SIZE +  UINT16_SIZE + len(city)
         weather_data = chunk[start_weather_data:]        
@@ -88,10 +108,22 @@ class PacketDistributor:
         
         filtered_weather_per_day = [s[:WEATHER_IMPORTANT_DATA_LEN] for s in weather_per_day]
         joined_data = b''.join(filtered_weather_per_day)
-        logging.info(f"La data importante de weather es: {joined_data}")
-        self._channel.basic_publish(exchange='weather_registries', 
-                                    routing_key=city, body=bytes(type_action)+chunk_id+joined_data)
+        logging.info(f"mando chunk de weather {header+joined_data}")
 
+        self._channel.basic_publish(exchange='weather_registries', 
+                                    routing_key=city, body=header+joined_data)
+
+
+
+
+    def __filter_day_duration(self, trips_chunk):
+        divided_trips = [trips_chunk[i:i+TRIP_DATA_LEN] 
+                         for i in range(0, len(trips_chunk), TRIP_DATA_LEN)]
+        
+        filtered_day_duration = [s[START_DATE_TRIP_POS:START_DATE_TRIP_POS+START_DATE_TRIP_LEN] + 
+                                 s[DURATION_TRIP_POS:DURATION_TRIP_POS+DURATION_TRIP_LEN]
+                                 for s in divided_trips]
+        return b''.join(filtered_day_duration)
 
 
     def __is_trip(self, type_action):
@@ -111,3 +143,6 @@ class PacketDistributor:
 
     def __decode_uint16(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
+
+    def __del__(self):
+        self._connection.close()

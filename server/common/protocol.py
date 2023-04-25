@@ -25,7 +25,10 @@ class Protocol:
         self._channel.basic_publish(
             exchange='',
             routing_key='task_queue',
-            body=data)
+            body=data,
+            properties=pika.BasicProperties(
+        delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+        ))
         return type_data
 
     def __decode_uint16(self, client_sock):
