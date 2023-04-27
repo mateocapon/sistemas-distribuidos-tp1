@@ -68,6 +68,7 @@ services:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
       - CITIES=montreal
+      - NUMBER_AVERAGE_DURATION_PROCESSES=2
     networks:
       - testing_net
     depends_on:
@@ -82,6 +83,49 @@ services:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
       - CITIES=montreal
+      - NUMBER_AVERAGE_DURATION_PROCESSES=2
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  average-duration-0:
+    container_name: average-duration-0
+    image: average-duration:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - PROCESS_ID=0
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  average-duration-1:
+    container_name: average-duration-1
+    image: average-duration:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - PROCESS_ID=1
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  eof-manager:
+    container_name: eof-manager
+    image: eof-manager:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - N_PACKET_DISTRIBUTOR=3
     networks:
       - testing_net
     depends_on:

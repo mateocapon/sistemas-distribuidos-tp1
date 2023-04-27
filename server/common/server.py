@@ -3,6 +3,7 @@ import logging
 import signal
 import multiprocessing as mp
 from common.clienthandler import handle_client_connection
+from common.resultshandler import ResultsHandler
 
 class Server:
     def __init__(self, port, listen_backlog, n_workers, n_cities):
@@ -16,9 +17,18 @@ class Server:
         self._workers = [mp.Process(target=handle_client_connection, 
                                     args=(self._clients_accepted_queue,))
                         for i in range(self._n_workers)]
+        self._resultshandler = ResultsHandler()
+
         signal.signal(signal.SIGTERM, self.__stop_accepting)
 
     def run(self):
+        self.__receive_data()
+        self._resultshandler.send_eof()
+        self.__send_results()
+        self._server_socket.close()
+        
+
+    def __receive_data(self):
         for worker in self._workers:
             worker.daemon = True
             worker.start()
@@ -36,8 +46,11 @@ class Server:
             [self._clients_accepted_queue.put((None, i)) for i in range(self._n_workers)]           
             for worker in self._workers:
                 worker.join()
-            self._server_socket.close()
             logging.info(f'action: join_processes | result: success')
+
+
+    def __send_results(self):
+        logging.info("Aca tendria que enviar los resultados")
 
     def __accept_new_connection(self):
         """

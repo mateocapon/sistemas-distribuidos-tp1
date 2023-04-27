@@ -16,6 +16,7 @@ WEATHER_IMPORTANT_DATA_LEN = DATE_WEATHER_LEN + FLOAT_ENCODED_LEN
 TRIP_DATA_LEN = 14
 
 DATE_POS = 0
+DURATION_POS = 1
 PRECTOT_POS = 1
 TYPE_POS = 4
 TYPE_SIZE = 1
@@ -24,32 +25,38 @@ SCALE_FLOAT = 1000
 
 CHUNK_WEATHER = b'W'
 LAST_CHUNK_WEATHER = b'B'
+SIMPLE_TRIP = b'S'
+
+
 
 class WeatherFilter:
-    def __init__(self, city, prectot_cond):
+    def __init__(self, city, prectot_cond, n_average_duration_processes):
         self._connection = pika.BlockingConnection(
                                 pika.ConnectionParameters(host='rabbitmq'))
         self._channel = self._connection.channel()
 
-        # weather registries
+        # weather registries to consume
         self._channel.exchange_declare(exchange='weather_registries', exchange_type='direct')
         result = self._channel.queue_declare(queue='', durable=True)
         self._weather_queue_name = result.method.queue
         self._channel.queue_bind(
             exchange='weather_registries', queue=self._weather_queue_name, routing_key=city)
 
-        # trips registries
+        # trips registries to consume
         self._channel.exchange_declare(exchange='trips_pipeline_average_time_weather', exchange_type='direct')
         result = self._channel.queue_declare(queue=city, durable=True)
         self._trips_queue_name = result.method.queue
         self._channel.queue_bind(
             exchange='trips_pipeline_average_time_weather', queue=self._trips_queue_name, routing_key=city)
 
+        # trips duration to produce 
+        self._channel.exchange_declare(exchange='trips_duration', exchange_type='direct')
+
         self._chunks_received = 0
         self._last_chunk_number = -1
         self._prectot_cond = prectot_cond * SCALE_FLOAT
         self._weather_registries = set()
-
+        self._n_average_duration_processes = n_average_duration_processes
 
     def run(self):
         self._channel.basic_consume(queue=self._weather_queue_name, 
@@ -85,19 +92,25 @@ class WeatherFilter:
 
     def __trips_callback(self, ch, method, properties, body):
         trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
-        divided_trips = [(trips_data[i:i+DATE_TRIP_LEN], trips_data[i+DATE_TRIP_LEN:i+TRIP_DATA_LEN])
-                           for i in range(0, len(trips_data), TRIP_DATA_LEN)]
-        for trip in divided_trips:
-            date = datetime.date.fromisoformat(trip[DATE_POS].decode('utf-8')) 
-            if date in self._weather_registries:
-                logging.info(f"Encontre uno que esta: {date}, {trip}")
+        data_for_average_duration = [b'' for i in range(self._n_average_duration_processes)]
+        
+        for i in range(0, len(trips_data), TRIP_DATA_LEN):
+            trip = trips_data[i:i+TRIP_DATA_LEN]
+            trip_date = datetime.date.fromisoformat(trip[:DATE_TRIP_LEN].decode('utf-8'))
+            if trip_date in self._weather_registries:
+                logging.info(f"Encontre uno que esta: {trip_date}, {trip}")
+                queue_to_send = hash(trip_date) % self._n_average_duration_processes
+                data_for_average_duration[queue_to_send] += trip
+
+
+        for queue_to_send, data in enumerate(data_for_average_duration):
+            if len(data) > 0:
+                self._channel.basic_publish(exchange='trips_duration', 
+                              routing_key=str(queue_to_send), body=SIMPLE_TRIP+data)
 
 
 
         chunk_id = self.__decode_uint32(body[NUMBER_CHUNK_POS:NUMBER_CHUNK_POS+NUMBER_CHUNK_SIZE])
-
-
-
         logging.info(f"recibo el id {chunk_id}")
 
     def __decode_uint32(self, to_decode):

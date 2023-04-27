@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.weatherfilter import WeatherFilter
+from common.duration_storage import DurationStorage
 import logging
 import os
 
@@ -27,9 +27,7 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["city"] = os.getenv('CITY', config["DEFAULT"]["CITY"])
-        config_params["prectot_cond"] = int(os.getenv('PRECTOT_COND', config["DEFAULT"]["PRECTOT_COND"]))
-        config_params["n_average_processes"] = int(os.getenv('NUMBER_AVERAGE_DURATION_PROCESSES', config["DEFAULT"]["NUMBER_AVERAGE_DURATION_PROCESSES"]))
+        config_params["process_id"] = int(os.getenv('PROCESS_ID', config["DEFAULT"]["PROCESS_ID"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -41,20 +39,18 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-    city = config_params["city"]
-    prectot_cond = config_params["prectot_cond"]
-    n_average_processes = config_params["n_average_processes"]
+    process_id = config_params["process_id"]
     
     initialize_log(logging_level)
 
     # Log config parameters at the beginning of the program to verify the configuration
     # of the component
     logging.debug(f"action: config | result: success | logging_level: {logging_level} |"
-                  f"city: {city} | prectot_cond: {prectot_cond}")
+                  f"process_id: {process_id} ")
 
     try:
-        distributor = WeatherFilter(city, prectot_cond, n_average_processes)
-        distributor.run()
+        average_duration = DurationStorage(process_id)
+        average_duration.run()
     except OSError as e:
         logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
 
