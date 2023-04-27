@@ -40,6 +40,9 @@ WEATHER_DATA_LEN = 88
 
 WEATHER_IMPORTANT_DATA_LEN = DATE_WEATHER_LEN + FLOAT_ENCODED_LEN
 
+PACKET_DISTRIBUTOR_ACK = b'A'
+EOF_MANAGER = b'F'
+
 
 TRIP_DATA_LEN = 50
 START_DATE_TRIP_POS = 0
@@ -62,12 +65,15 @@ class PacketDistributor:
         # init trips exchange for the average time pipeline
         self._channel.exchange_declare(exchange='trips_pipeline_average_time_weather', exchange_type='direct')
 
+        # queue to send eof ACK.
+        self._channel.queue_declare(queue='eof-manager', durable=True)
 
 
     def run(self):
         self._channel.basic_qos(prefetch_count=1)
         self._channel.basic_consume(queue='task_queue', on_message_callback=self.__callback)
         self._channel.start_consuming()
+        logging.info("Recibo EOF")
 
 
 
@@ -81,6 +87,8 @@ class PacketDistributor:
             self.__process_weather_chunk(body)
         elif self.__is_station(type_action):
             self.__process_stations_chunk(body)
+        elif self.__is_eof(type_action):
+            self.__process_eof()
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
@@ -108,7 +116,6 @@ class PacketDistributor:
         
         filtered_weather_per_day = [s[:WEATHER_IMPORTANT_DATA_LEN] for s in weather_per_day]
         joined_data = b''.join(filtered_weather_per_day)
-        logging.info(f"mando chunk de weather {header+joined_data}")
 
         self._channel.basic_publish(exchange='weather_registries', 
                                     routing_key=city, body=header+joined_data)
@@ -126,6 +133,10 @@ class PacketDistributor:
         return b''.join(filtered_day_duration)
 
 
+    def __process_eof(self):
+        self._channel.basic_publish(exchange='', routing_key='eof-manager', body=PACKET_DISTRIBUTOR_ACK)
+        self._channel.stop_consuming()
+
     def __is_trip(self, type_action):
         return type_action == CHUNK_TRIPS[0] or type_action == LAST_CHUNK_TRIPS[0]
 
@@ -134,6 +145,9 @@ class PacketDistributor:
 
     def __is_station(self, type_action):
         return type_action == CHUNK_STATIONS[0] or type_action == LAST_CHUNK_STATIONS[0]
+
+    def __is_eof(self, type_action):
+        return type_action == EOF_MANAGER[0]
 
     def __decode_city(self, chunk):
         size_city = self.__decode_uint16(chunk[CITY_SIZE_POS: CITY_SIZE_POS + UINT16_SIZE])

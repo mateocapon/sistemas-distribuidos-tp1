@@ -125,7 +125,10 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
-      - N_PACKET_DISTRIBUTOR=3
+      - N_PACKET_DISTRIBUTOR=1
+      - CITIES=montreal
+      - N_WEATHER_FILTER_PER_CITY=2
+      - N_DURATION_AVERAGE=2
     networks:
       - testing_net
     depends_on:

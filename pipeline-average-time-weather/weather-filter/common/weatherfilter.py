@@ -27,6 +27,8 @@ CHUNK_WEATHER = b'W'
 LAST_CHUNK_WEATHER = b'B'
 SIMPLE_TRIP = b'S'
 
+WEATHER_FILTER_EOF = b'XXXXE'
+WEATHER_FILTER_ACK = b'B'
 
 
 class WeatherFilter:
@@ -70,7 +72,6 @@ class WeatherFilter:
 
     def __weather_callback(self, ch, method, properties, body):
         weather_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
-        logging.info(f"weather_data: {weather_data}")
         weather_per_day = [(weather_data[i:i+DATE_WEATHER_LEN], 
                             weather_data[i+DATE_WEATHER_LEN:i+WEATHER_IMPORTANT_DATA_LEN])
                            for i in range(0, len(weather_data), WEATHER_IMPORTANT_DATA_LEN)]
@@ -91,6 +92,12 @@ class WeatherFilter:
 
 
     def __trips_callback(self, ch, method, properties, body):
+        if body[TYPE_POS] == WEATHER_FILTER_EOF[TYPE_POS]:
+            self.__process_eof()
+            return
+
+
+
         trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
         data_for_average_duration = [b'' for i in range(self._n_average_duration_processes)]
         
@@ -112,6 +119,11 @@ class WeatherFilter:
 
         chunk_id = self.__decode_uint32(body[NUMBER_CHUNK_POS:NUMBER_CHUNK_POS+NUMBER_CHUNK_SIZE])
         logging.info(f"recibo el id {chunk_id}")
+
+
+    def __process_eof(self):
+        self._channel.basic_publish(exchange='', routing_key='eof-manager', body=WEATHER_FILTER_ACK)
+        self._channel.stop_consuming()
 
     def __decode_uint32(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
