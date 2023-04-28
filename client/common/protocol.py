@@ -2,6 +2,7 @@ import logging
 from common.station import Station
 
 UINT16_SIZE = 2
+INT16_SIZE = 2
 INT32_SIZE = 4
 SCALE_FLOAT = 1000
 
@@ -28,7 +29,7 @@ class Protocol:
         self.__send_stations_chunk(socket, city, stations, CHUNK_STATIONS)
 
     def send_last_stations_chunk(self, socket, city, stations):
-        logging.info("mando last chunk")
+        logging.info("action: send_last_chunk | type: stations")
         self.__send_stations_chunk(socket, city, stations, LAST_CHUNK_STATIONS)
 
     def __send_stations_chunk(self, socket, city, stations, type_msg):
@@ -51,7 +52,7 @@ class Protocol:
         self.__send_weather_chunk(socket, city, weather, CHUNK_WEATHER)
 
     def send_last_weather_chunk(self, socket, city, weather):
-        logging.info("mando last chunk")
+        logging.info("action: send_last_chunk | type: weather")
         self.__send_weather_chunk(socket, city, weather, LAST_CHUNK_WEATHER)
 
     def __send_weather_chunk(self, socket, city, weather, type_msg):
@@ -90,7 +91,7 @@ class Protocol:
         self.__send_trips_chunk(socket, city, stations, CHUNK_TRIPS)
 
     def send_last_trips_chunk(self, socket, city, stations):
-        logging.info("mando last chunk")
+        logging.info("action: send_last_chunk | type: trips")
         self.__send_trips_chunk(socket, city, stations, LAST_CHUNK_TRIPS)
 
     def __send_trips_chunk(self, socket, city, trips, type_msg):
@@ -99,9 +100,9 @@ class Protocol:
         payload += self.__encode_string(city)
         for trip in trips:
             payload += self.__encode_date(trip.start_date, DATE_TRIP_LEN)
-            payload += self.__encode_uint16(trip.start_station_code)
+            payload += self.__encode_int16(trip.start_station_code)
             payload += self.__encode_date(trip.end_date, DATE_TRIP_LEN)
-            payload += self.__encode_uint16(trip.end_station_code)
+            payload += self.__encode_int16(trip.end_station_code)
             payload += self.__encode_float(trip.duration_sec)
             payload += self.__encode_uint16(trip.is_member)
             payload += self.__encode_uint16(trip.yearid)
@@ -127,6 +128,9 @@ class Protocol:
     
     def __encode_uint16(self, to_encode):
         return to_encode.to_bytes(UINT16_SIZE, "big")
+
+    def __encode_int16(self, to_encode):
+        return to_encode.to_bytes(INT16_SIZE, "big", signed=True)
 
     def __sendall(self, socket, msg):
         size_msg = len(msg)

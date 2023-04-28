@@ -7,6 +7,8 @@ from common.protocol import Protocol
 from common.station import Station
 from common.weather import Weather
 
+INVALID_TRIP_STATION = "-1"
+
 
 def files_reader(cities_queue, server_addr, chunk_size, max_package_size):
     working = True
@@ -94,7 +96,12 @@ class FilesReader:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
             next(reader) # read the header
             for row in reader:
-                yield Trip(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                try:
+                    yield Trip(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                except ValueError:
+                    yield Trip(row[0], INVALID_TRIP_STATION, row[2], INVALID_TRIP_STATION,
+                               row[4], row[5], row[6])
+
 
     def __stop_reader(self, *args):
         try:

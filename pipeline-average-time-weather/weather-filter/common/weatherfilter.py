@@ -34,7 +34,7 @@ WEATHER_FILTER_ACK = b'B'
 class WeatherFilter:
     def __init__(self, city, prectot_cond, n_average_duration_processes):
         self._connection = pika.BlockingConnection(
-                                pika.ConnectionParameters(host='rabbitmq'))
+                                pika.ConnectionParameters(host='rabbitmq', heartbeat=1200))
         self._channel = self._connection.channel()
 
         # weather registries to consume
@@ -62,12 +62,13 @@ class WeatherFilter:
 
     def run(self):
         self._channel.basic_consume(queue=self._weather_queue_name, 
-                                    on_message_callback=self.__weather_callback, auto_ack=True)
+                                    on_message_callback=self.__weather_callback)
         self._channel.start_consuming()
         logging.info(f"Termine de consumir stations")
 
+        self._channel.basic_qos(prefetch_count=1)
         self._channel.basic_consume(queue=self._trips_queue_name, 
-                                    on_message_callback=self.__trips_callback, auto_ack=True)
+                                    on_message_callback=self.__trips_callback)
         self._channel.start_consuming()
 
     def __weather_callback(self, ch, method, properties, body):
@@ -85,7 +86,6 @@ class WeatherFilter:
             chunk_id = self.__decode_uint32(body[NUMBER_CHUNK_POS:NUMBER_CHUNK_POS+NUMBER_CHUNK_SIZE])
             self._last_chunk_number = chunk_id
         self._chunks_received += 1
-        logging.info(f"consumo {self._chunks_received}  {self._last_chunk_number}   {body[TYPE_POS]}   {LAST_CHUNK_WEATHER[0]}")
         if self._chunks_received - 1 == self._last_chunk_number:
             logging.info("Llego el ultimo")
             self._channel.stop_consuming()
@@ -95,9 +95,6 @@ class WeatherFilter:
         if body[TYPE_POS] == WEATHER_FILTER_EOF[TYPE_POS]:
             self.__process_eof()
             return
-
-
-
         trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
         data_for_average_duration = [b'' for i in range(self._n_average_duration_processes)]
         
@@ -105,23 +102,19 @@ class WeatherFilter:
             trip = trips_data[i:i+TRIP_DATA_LEN]
             trip_date = datetime.date.fromisoformat(trip[:DATE_TRIP_LEN].decode('utf-8'))
             if trip_date in self._weather_registries:
-                logging.info(f"Encontre uno que esta: {trip_date}, {trip}")
                 queue_to_send = hash(trip_date) % self._n_average_duration_processes
+                #logging.info(f"El date {trip_date} va a {queue_to_send}")
                 data_for_average_duration[queue_to_send] += trip
-
 
         for queue_to_send, data in enumerate(data_for_average_duration):
             if len(data) > 0:
                 self._channel.basic_publish(exchange='trips_duration', 
                               routing_key=str(queue_to_send), body=SIMPLE_TRIP+data)
-
-
-
-        chunk_id = self.__decode_uint32(body[NUMBER_CHUNK_POS:NUMBER_CHUNK_POS+NUMBER_CHUNK_SIZE])
-        logging.info(f"recibo el id {chunk_id}")
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
     def __process_eof(self):
+        logging.info(f'action: eof_ack | result: sended')
         self._channel.basic_publish(exchange='', routing_key='eof-manager', body=WEATHER_FILTER_ACK)
         self._channel.stop_consuming()
 

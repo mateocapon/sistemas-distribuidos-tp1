@@ -35,7 +35,6 @@ class ClientHandler:
     def __receive_chunks(self, type_chunk, client_sock):
         chunk_id = 0
         status = type_chunk
-        logging.info(f"El status vale, {status}")
         while status == type_chunk:
             status = self._protocol.forward_chunk(client_sock, chunk_id)
             chunk_id += 1

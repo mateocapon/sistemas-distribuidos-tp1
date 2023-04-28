@@ -17,13 +17,13 @@ class Server:
         self._workers = [mp.Process(target=handle_client_connection, 
                                     args=(self._clients_accepted_queue,))
                         for i in range(self._n_workers)]
-        self._resultshandler = ResultsHandler()
-
         signal.signal(signal.SIGTERM, self.__stop_accepting)
 
     def run(self):
         self.__receive_data()
-        self._resultshandler.send_eof()
+        resultshandler = ResultsHandler()
+        resultshandler.send_eof()
+        resultshandler.wait_for_results()
         self.__send_results()
         self._server_socket.close()
         

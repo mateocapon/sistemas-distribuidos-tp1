@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.eofmanager import EOFManager
+from common.results_collector import ResultsCollector
 import logging
 import os
 
@@ -27,10 +27,7 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["cities"] = os.getenv('CITIES', config["DEFAULT"]["CITIES"])
-        config_params["number_packet_distributor"] = int(os.getenv('N_PACKET_DISTRIBUTOR', config["DEFAULT"]["N_PACKET_DISTRIBUTOR"]))
-        config_params["n_weather_filter_per_city"] = os.getenv('N_WEATHER_FILTER_PER_CITY', config["DEFAULT"]["N_WEATHER_FILTER_PER_CITY"])
-        config_params["n_duration_average"] = int(os.getenv('NUMBER_AVERAGE_DURATION_PROCESSES', config["DEFAULT"]["NUMBER_AVERAGE_DURATION_PROCESSES"]))
+        config_params["n_average_processes"] = int(os.getenv('NUMBER_AVERAGE_DURATION_PROCESSES', config["DEFAULT"]["NUMBER_AVERAGE_DURATION_PROCESSES"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -42,26 +39,18 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-    n_packet_distributor = config_params["number_packet_distributor"]
-    cities = config_params["cities"].split(',')
-    n_weather_filter_per_city = config_params["n_weather_filter_per_city"].split(',')
-    n_duration_average = config_params["n_duration_average"]
-    weather_filter_per_city = {}
-    for i, city in enumerate(cities):
-        weather_filter_per_city[city] = int(n_weather_filter_per_city[i])
+    n_average_processes = config_params["n_average_processes"]
     
     initialize_log(logging_level)
 
     # Log config parameters at the beginning of the program to verify the configuration
     # of the component
-    logging.info(f"action: config | result: success | logging_level: {logging_level} |"
-                  f"number_packet_distributor: {n_packet_distributor} | " 
-                  f"n_duration_average: {n_duration_average} | "
-                  f"weather_filter_per_city: {weather_filter_per_city}")
+    logging.debug(f"action: config | result: success | logging_level: {logging_level} |"
+                  f"n_average_processes: {n_average_processes} ")
 
     try:
-        eof_manager = EOFManager(cities, n_packet_distributor, weather_filter_per_city, n_duration_average)
-        eof_manager.run()
+        results_collector = ResultsCollector(n_average_processes)
+        results_collector.run()
     except OSError as e:
         logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
 

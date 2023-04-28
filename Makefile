@@ -5,6 +5,7 @@ docker-image:
 	docker build -f ./packet-distributor/Dockerfile -t "packet-distributor:latest" .
 	docker build -f ./pipeline-average-time-weather/weather-filter/Dockerfile -t "weather-filter:latest" .
 	docker build -f ./pipeline-average-time-weather/average-duration/Dockerfile -t "average-duration:latest" .
+	docker build -f ./pipeline-average-time-weather/results-collector/Dockerfile -t "results-collector-average:latest" .
 	docker build -f ./eof-manager/Dockerfile -t "eof-manager:latest" .
 	# Execute this command from time to time to clean up intermediate stages generated 
 	# during client build (your hard drive will like this :) ). Don't left uncommented if you 

@@ -55,7 +55,7 @@ class PacketDistributor:
     def __init__(self):
         # init queue to consume
         self._connection = pika.BlockingConnection(
-                            pika.ConnectionParameters(host='rabbitmq'))
+                            pika.ConnectionParameters(host='rabbitmq', heartbeat=1200))
         self._channel = self._connection.channel()
         self._channel.queue_declare(queue='task_queue', durable=True)
 
@@ -76,11 +76,8 @@ class PacketDistributor:
         logging.info("Recibo EOF")
 
 
-
-
     def __callback(self, ch, method, properties, body):
         type_action = body[TYPE_POS]
-        logging.info(f"El type_action es {type_action}: {CHUNK_WEATHER[0]}")
         if self.__is_trip(type_action):
             self.__process_trips_chunk(body)
         elif self.__is_weather(type_action):
@@ -98,7 +95,6 @@ class PacketDistributor:
         start_trips_data = UINT32_SIZE + TYPE_SIZE +  UINT16_SIZE + len(city)
         trips_data = chunk[start_trips_data:]
         filtered_day_duration = self.__filter_day_duration(trips_data)
-        logging.info(f"mando chunk de trips {header+filtered_day_duration}")
         self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
                                     routing_key=city, body=header+filtered_day_duration)
 
@@ -134,6 +130,7 @@ class PacketDistributor:
 
 
     def __process_eof(self):
+        logging.info(f'action: eof_ack | result: sended')
         self._channel.basic_publish(exchange='', routing_key='eof-manager', body=PACKET_DISTRIBUTOR_ACK)
         self._channel.stop_consuming()
 
@@ -151,7 +148,6 @@ class PacketDistributor:
 
     def __decode_city(self, chunk):
         size_city = self.__decode_uint16(chunk[CITY_SIZE_POS: CITY_SIZE_POS + UINT16_SIZE])
-        logging.info(f"El size de la city es {size_city}")
         city = chunk[CITY_POS: CITY_POS + size_city]
         return city
 
