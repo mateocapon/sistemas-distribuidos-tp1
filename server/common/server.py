@@ -1,18 +1,22 @@
 import socket
 import logging
 import signal
+import queue
 import multiprocessing as mp
 from common.clienthandler import handle_client_connection
-from common.resultshandler import ResultsHandler
+from common.resultshandler import wait_for_results
+from common.protocol import Protocol
+import time
 
 class Server:
-    def __init__(self, port, listen_backlog, n_workers, n_cities):
+    def __init__(self, port, listen_backlog, n_workers, n_cities, n_queries):
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind(('', port))
         self._server_socket.listen(listen_backlog)
         self._server_active = True
         self._n_workers = min(n_workers, n_cities)
         self._n_cities = n_cities
+        self._n_queries = n_queries
         self._clients_accepted_queue = mp.Queue()
         self._workers = [mp.Process(target=handle_client_connection, 
                                     args=(self._clients_accepted_queue,))
@@ -21,12 +25,35 @@ class Server:
 
     def run(self):
         self.__receive_data()
-        resultshandler = ResultsHandler()
-        resultshandler.send_eof()
-        resultshandler.wait_for_results()
         self.__send_results()
         self._server_socket.close()
-        
+
+
+    def __send_results(self):
+        results_queue = mp.Queue()
+        resultshandler = mp.Process(target=wait_for_results, args=(results_queue, self._n_queries,))
+        resultshandler.daemon = True
+        resultshandler.start()
+
+        results_received = 0 
+        polling_sleep_time = 1
+        protocol = Protocol()
+        while results_received < self._n_queries:
+            client_sock = self.__accept_new_connection()
+            results = []
+            while True:
+                try:
+                    results.append(results_queue.get_nowait())
+                    logging.info(f"receibi un resultado")
+                except queue.Empty:
+                    results_received += len(results)
+                    protocol.send_results(client_sock, results)
+                    time.sleep(polling_sleep_time)
+                    polling_sleep_time = polling_sleep_time * 2
+                    break
+            client_sock.close()
+        resultshandler.join()
+ 
 
     def __receive_data(self):
         for worker in self._workers:
@@ -48,9 +75,6 @@ class Server:
                 worker.join()
             logging.info(f'action: join_processes | result: success')
 
-
-    def __send_results(self):
-        logging.info("Aca tendria que enviar los resultados")
 
     def __accept_new_connection(self):
         """

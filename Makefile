@@ -9,6 +9,7 @@ docker-image:
 	docker build -f ./eof-manager/Dockerfile -t "eof-manager:latest" .
 	docker build -f ./stations-joiner/Dockerfile -t "stations-joiner:latest" .
 	docker build -f ./pipeline-trips-per-year/trips-per-year/Dockerfile -t "trips-per-year:latest" .
+	docker build -f ./pipeline-trips-per-year/results-collector/Dockerfile -t "results-collector-trips-per-year:latest" .
 	# Execute this command from time to time to clean up intermediate stages generated 
 	# during client build (your hard drive will like this :) ). Don't left uncommented if you 
 	# want to avoid rebuilding client image every time the docker-compose-up command 
@@ -17,16 +18,16 @@ docker-image:
 .PHONY: docker-image
 
 docker-compose-up: docker-image
-	docker compose -f docker-compose.yaml up -d --build
+	docker compose -f docker-compose-dev.yaml up -d --build
 .PHONY: docker-compose-up
 
 docker-compose-down:
-	docker compose  -f docker-compose.yaml stop -t 1
-	docker compose -f docker-compose.yaml down
+	docker compose -f docker-compose-dev.yaml stop -t 1
+	docker compose -f docker-compose-dev.yaml down
 .PHONY: docker-compose-down
 
 docker-compose-logs:
-	docker compose -f docker-compose.yaml logs -f
+	docker compose -f docker-compose-dev.yaml logs -f
 .PHONY: docker-compose-logs
 
 run-client:

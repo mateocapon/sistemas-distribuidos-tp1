@@ -93,7 +93,6 @@ class StationsJoiner:
                 current_trip += joined 
             if join_success:
                 join_results += current_trip
-        logging.info(f"estaria para mandar: {join_results}")
         self._channel.basic_publish(exchange='stations-join-results',
                                     routing_key=send_response_to.decode("utf-8")+"."+self._city,
                                     body=TRIPS_PACKET+join_results)

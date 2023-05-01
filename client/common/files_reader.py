@@ -7,6 +7,7 @@ from common.protocol import Protocol
 from common.station import Station
 from common.weather import Weather
 import time
+from common.weather import INVALID_YEAR_ID
 
 INVALID_TRIP_STATION = "-1"
 
@@ -89,10 +90,16 @@ class FilesReader:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
             next(reader) # read the header
             for row in reader:
-                yield Weather(row[0], row[1], row[2], row[3], row[4], row[5],
-                              row[6], row[7], row[8], row[9], row[10], row[11],
-                              row[12], row[13], row[14], row[15], row[16],
-                              row[17], row[18], row[19], row[20])
+                try:
+                    yield Weather(row[0], row[1], row[2], row[3], row[4], row[5],
+                                  row[6], row[7], row[8], row[9], row[10], row[11],
+                                  row[12], row[13], row[14], row[15], row[16],
+                                  row[17], row[18], row[19], row[20])
+                except IndexError:
+                    yield Weather(row[0], row[1], row[2], row[3], row[4], row[5],
+                                  row[6], row[7], row[8], row[9], row[10], row[11],
+                                  row[12], row[13], row[14], row[15], row[16],
+                                  row[17], row[18], row[19], INVALID_YEAR_ID)
 
 
     def __load_trips(self, file_path):

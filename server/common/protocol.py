@@ -31,6 +31,14 @@ class Protocol:
         ))
         return type_data
 
+
+    def send_results(self, client_sock, results):
+        results_msg = self.__encode_uint16(len(results))
+        for res in results:
+            results_msg += self.__encode_uint16(len(res))
+            results_msg += res
+        client_sock.sendall(results_msg)
+
     def __decode_uint16(self, client_sock):
         len_data = self.__recvall(client_sock, UINT16_SIZE)
         return int.from_bytes(len_data, byteorder='big')
@@ -49,6 +57,9 @@ class Protocol:
 
     def __encode_uint32(self, to_encode):
         return to_encode.to_bytes(UINT32_SIZE, "big")
+
+    def __encode_uint16(self, to_encode):
+        return to_encode.to_bytes(UINT16_SIZE, "big")
 
     def __del__(self):
         self._connection.close()

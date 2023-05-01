@@ -43,7 +43,6 @@ class TripsPerYear:
         logging.info(f"Termine de consumir durations")
 
     def __trips_callback(self, ch, method, properties, body):
-        logging.info(f"TODO: BODY: {body}")
         type_message = body[0]
         if type_message == TRIPS_PER_YEAR_EOF[0]:
             self.__send_results()
@@ -56,7 +55,6 @@ class TripsPerYear:
             trip_name = self.__decode_string(body[current_pos:])
             current_pos = current_pos + UINT16_SIZE + len(trip_name)
             self.__process_trip(trip_name, trip_year)
-            logging.info(f"name: {trip_name}| year: {trip_year}")
 
 
     def __process_trip(self, name, yearid):
@@ -78,13 +76,15 @@ class TripsPerYear:
 
     def __send_results(self):
         logging.info(f"Los results son {self._stations_double_trips}")
-
-        results = self.__encode_string(self._city)
+        city = self.__encode_string(self._city)
+        results = b''
         for key, value in self._stations_double_trips.items():
-            results += key
-            results += self.__encode_bool(value[DOUBLE_POS])
-
-        self._channel.basic_publish(exchange='', routing_key='results-collector-trips-per-year', body=results)
+            if value[DOUBLE_POS]:
+                results += self.__encode_string(key.decode('utf-8'))
+        len_results = self.__encode_uint16(len(results))
+        self._channel.basic_publish(exchange='', 
+                                    routing_key='results-collector-trips-per-year',
+                                    body=city+len_results+results)
         self._channel.stop_consuming()
 
 
@@ -94,15 +94,13 @@ class TripsPerYear:
     def __decode_uint16(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
 
-    def __encode_bool(self, to_encode):
-        if to_encode:
-            return TRUE_ENCODED
-        return FALSE_ENCODED
-
     def __encode_string(self, to_encode):
         encoded = to_encode.encode('utf-8')
         size = len(encoded).to_bytes(UINT16_SIZE, "big")
         return size + encoded
+
+    def __encode_uint16(self, to_encode):
+        return to_encode.to_bytes(UINT16_SIZE, "big")
 
     def __decode_string(self, to_decode):
         size_string = self.__decode_uint16(to_decode[:UINT16_SIZE])

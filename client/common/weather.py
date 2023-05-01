@@ -1,4 +1,4 @@
-
+INVALID_YEAR_ID = 0
 
 class Weather:
     def __init__(self, date: str, prectot: str, qv2m: str, rh2m: str,

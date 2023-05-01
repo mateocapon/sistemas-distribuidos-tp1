@@ -1,5 +1,6 @@
 import logging
 from common.station import Station
+import datetime
 
 UINT16_SIZE = 2
 INT16_SIZE = 2
@@ -19,7 +20,13 @@ LAST_CHUNK_WEATHER = b'B'
 
 CHUNK_TRIPS = b'T'
 LAST_CHUNK_TRIPS = b'C'
+GET_RESULTS_MESSAGE = 'R'
 
+RESULTS_AVERAGE_DURATION = b'A'
+
+TYPE_POS = 0
+TYPE_LEN = 1
+AVERAGE_DURATION_RESPONSE_LEN = DATE_WEATHER_LEN + INT32_SIZE
 
 class Protocol:
     def __init__(self, max_package_size):
@@ -112,6 +119,32 @@ class Protocol:
         self.__sendall(socket, msg)
 
 
+
+    def ask_for_results(self, skt):
+        results = []
+        n_results = self.__decode_uint16(skt)
+        for i in range(n_results):
+            results.append(self.__receive_one_result(skt))
+        return results
+
+    def __receive_one_result(self, skt):
+        len_results = self.__decode_uint16(skt)
+        res = self.__recvall(skt, len_results)
+        type_result = res[TYPE_POS]
+        if type_result == RESULTS_AVERAGE_DURATION[0]:
+            res = self.__receive_average_durations(skt, res[TYPE_POS+TYPE_LEN:])
+            logging.info("recibiendo data de average results")
+        return (type_result, res)
+
+    def __receive_average_durations(self, skt, all_results):
+        res = []
+        for i in range(0, len(all_results), AVERAGE_DURATION_RESPONSE_LEN):
+            date = all_results[i:i+DATE_WEATHER_LEN].decode("utf-8")
+            average_duration = self.__decode_float(all_results[i+DATE_WEATHER_LEN: i+DATE_WEATHER_LEN+INT32_SIZE])
+            res.append((date, average_duration))
+        return res
+
+
     def __encode_string(self, to_encode):
         encoded = to_encode.encode('utf-8')
         size = len(encoded).to_bytes(UINT16_SIZE, "big")
@@ -125,7 +158,12 @@ class Protocol:
 
     def __encode_float(self, to_encode):
         return int(to_encode * SCALE_FLOAT).to_bytes(INT32_SIZE, "big", signed = True)
-    
+
+
+    def __decode_float(self, to_decode):
+        return float(int.from_bytes(to_decode, "big")) / SCALE_FLOAT
+
+
     def __encode_uint16(self, to_encode):
         return to_encode.to_bytes(UINT16_SIZE, "big")
 
@@ -138,4 +176,21 @@ class Protocol:
             raise Exception(f"Package of size {size_msg} is too big."
                             f" max_package_size: {self._max_package_size}")
         socket.sendall(msg)
+
+
+    def __decode_uint16(self, client_sock):
+        len_data = self.__recvall(client_sock, UINT16_SIZE)
+        return int.from_bytes(len_data, byteorder='big')
+
+    def __recvall(self, client_sock, n):
+        """ 
+        Recv all n bytes to avoid short read
+        """
+        data = b''
+        while len(data) < n:
+            received = client_sock.recv(n - len(data)) 
+            if not received:
+                raise OSError("No data received in recvall")
+            data += received
+        return data
 

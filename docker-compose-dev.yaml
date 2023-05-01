@@ -10,10 +10,11 @@ services:
     networks:
       - testing_net
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        test: [CMD, curl, -f, http://localhost:15672]
         interval: 10s
         timeout: 5s
         retries: 10
+
 
   client:
     container_name: client
@@ -22,7 +23,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=DEBUG
-      - CITIES=montreal
+      - CITIES=montreal,toronto
     volumes:
       - ./client/config.ini:/config.ini
       - ./.data/dev:/data
@@ -30,7 +31,8 @@ services:
       - testing_net
     depends_on:
       - server
-      
+
+  
   server:
     container_name: server
     image: server:latest
@@ -38,7 +40,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
-      - N_CITIES=1
+      - N_CITIES=2
     volumes:
       - ./server/config.ini:/config.ini
     networks:
@@ -47,57 +49,89 @@ services:
       rabbitmq:
         condition: service_healthy
 
+
   packet_distributor1:
+    container_name: packet-distributor1
     image: packet-distributor:latest
     entrypoint: python3 /main.py
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
+      - FIRST_YEAR_COMPARE=2016
+      - SECOND_YEAR_COMPARE=2017
     networks:
       - testing_net
     depends_on:
       rabbitmq:
         condition: service_healthy
+
 
   packet_distributor2:
+    container_name: packet-distributor2
     image: packet-distributor:latest
     entrypoint: python3 /main.py
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
+      - FIRST_YEAR_COMPARE=2016
+      - SECOND_YEAR_COMPARE=2017
     networks:
       - testing_net
     depends_on:
       rabbitmq:
         condition: service_healthy
 
-  weather-filter0:
+
+  weather-filter-montreal1:
+    container_name: weather-filter-montreal1
     image: weather-filter:latest
     entrypoint: python3 /main.py
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
-      - CITY = montreal
+      - CITY=montreal
       - NUMBER_AVERAGE_DURATION_PROCESSES=2
+      - PRECTOT_COND=4
     networks:
       - testing_net
     depends_on:
       rabbitmq:
         condition: service_healthy
 
-  weather-filter1:
+
+  weather-filter-montreal2:
+    container_name: weather-filter-montreal2
     image: weather-filter:latest
     entrypoint: python3 /main.py
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
-      - CITY = montreal
+      - CITY=montreal
       - NUMBER_AVERAGE_DURATION_PROCESSES=2
+      - PRECTOT_COND=4
     networks:
       - testing_net
     depends_on:
       rabbitmq:
         condition: service_healthy
+
+
+  weather-filter-toronto1:
+    container_name: weather-filter-toronto1
+    image: weather-filter:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - CITY=toronto
+      - NUMBER_AVERAGE_DURATION_PROCESSES=2
+      - PRECTOT_COND=4
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
 
   average-duration-0:
     container_name: average-duration-0
@@ -113,6 +147,7 @@ services:
       rabbitmq:
         condition: service_healthy
 
+
   average-duration-1:
     container_name: average-duration-1
     image: average-duration:latest
@@ -127,6 +162,7 @@ services:
       rabbitmq:
         condition: service_healthy
 
+
   results-collector-average:
     container_name: results-collector-average
     image: results-collector-average:latest
@@ -140,6 +176,7 @@ services:
       rabbitmq:
         condition: service_healthy
 
+
   eof-manager:
     container_name: eof-manager
     image: eof-manager:latest
@@ -148,9 +185,9 @@ services:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
       - N_PACKET_DISTRIBUTOR=2
-      - CITIES=montreal
-      - N_WEATHER_FILTER_PER_CITY=2
-      - N_STATIONS_JOINER_PER_CITY=1
+      - CITIES=montreal,toronto
+      - N_WEATHER_FILTER_PER_CITY=2,1
+      - N_STATIONS_JOINER_PER_CITY=1,1
       - NUMBER_AVERAGE_DURATION_PROCESSES=2
     networks:
       - testing_net
@@ -158,8 +195,9 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  stations-joiner:
-    container_name: stations-joiner
+
+  stations-joiner-montreal1:
+    container_name: stations-joiner-montreal1
     image: stations-joiner:latest
     entrypoint: python3 /main.py
     environment:
@@ -173,8 +211,23 @@ services:
         condition: service_healthy
 
 
-  trips-per-year:
-    container_name: trips-per-year
+  stations-joiner-toronto1:
+    container_name: stations-joiner-toronto1
+    image: stations-joiner:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - CITY=toronto
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  trips-per-year-montreal:
+    container_name: trips-per-year-montreal
     image: trips-per-year:latest
     entrypoint: python3 /main.py
     environment:
@@ -189,6 +242,24 @@ services:
       rabbitmq:
         condition: service_healthy
 
+
+  trips-per-year-toronto:
+    container_name: trips-per-year-toronto
+    image: trips-per-year:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - CITY=toronto
+      - FIRST_YEAR_COMPARE=2016
+      - SECOND_YEAR_COMPARE=2017
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
   results-collector-trips-per-year:
     container_name: results-collector-trips-per-year
     image: results-collector-trips-per-year:latest
@@ -196,12 +267,13 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
-      - CITIES=montreal
+      - N_CITIES=2
     networks:
       - testing_net
     depends_on:
       rabbitmq:
         condition: service_healthy
+
 
 networks:
   testing_net:

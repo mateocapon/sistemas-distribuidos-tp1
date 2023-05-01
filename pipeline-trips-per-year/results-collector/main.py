@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.server import Server
+from common.results_collector import ResultsCollector
 import logging
 import os
 
@@ -26,16 +26,12 @@ def initialize_config():
 
     config_params = {}
     try:
-        config_params["port"] = int(os.getenv('SERVER_PORT', config["DEFAULT"]["SERVER_PORT"]))
-        config_params["listen_backlog"] = int(os.getenv('SERVER_LISTEN_BACKLOG', config["DEFAULT"]["SERVER_LISTEN_BACKLOG"]))
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["number_processes_pool"] = int(os.getenv('NUMBER_PROCESSES_POOL', config["DEFAULT"]["NUMBER_PROCESSES_POOL"]))
         config_params["n_cities"] = int(os.getenv('N_CITIES', config["DEFAULT"]["N_CITIES"]))
-        config_params["n_queries"] = int(os.getenv('N_QUERIES', config["DEFAULT"]["N_QUERIES"]))
     except KeyError as e:
-        raise KeyError("Key was not found. Error: {} .Aborting server".format(e))
+        raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
-        raise ValueError("Key could not be parsed. Error: {}. Aborting server".format(e))
+        raise ValueError("Key could not be parsed. Error: {}. Aborting packet-distributor".format(e))
 
     return config_params
 
@@ -43,25 +39,20 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-    port = config_params["port"]
-    listen_backlog = config_params["listen_backlog"]
-    number_processes_pool = config_params["number_processes_pool"]
     n_cities = config_params["n_cities"]
-    n_queries = config_params["n_queries"]
-
+    
     initialize_log(logging_level)
 
     # Log config parameters at the beginning of the program to verify the configuration
     # of the component
-    logging.debug(f"action: config | result: success | port: {port} | n_cities: {n_cities} | "
-                  f"listen_backlog: {listen_backlog} | logging_level: {logging_level}")
+    logging.info(f"action: config | result: success | logging_level: {logging_level} |"
+                  f"n_cities: {n_cities} ")
 
-    # Initialize server and start server loop
     try:
-        server = Server(port, listen_backlog, number_processes_pool, n_cities, n_queries)
-        server.run()
+        results_collector = ResultsCollector(n_cities)
+        results_collector.run()
     except OSError as e:
-        logging.error(f'action: initialize_server | result: fail | error: {e}')
+        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
 
 def initialize_log(logging_level):
     """
