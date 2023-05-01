@@ -55,6 +55,7 @@ YEAR_ID_POS = -2
 CODE_LEN = 2
 YEAR_ID_LEN = 2
 TYPE_JOIN_ONLY_NAME = b'N'
+START_CODE_POS = 19
 
 class PacketDistributor:
     def __init__(self, first_year_compare, second_year_compare):
@@ -154,22 +155,21 @@ class PacketDistributor:
         #join only by start code.
         number_codes_to_join = 1
         send_response_to = "trips_per_year".encode('utf-8')
-        filtered = b''
-
-        filtered = filtered + self.__encode_uint16(trip_len) + type_join + \
-                   self.__encode_uint16(number_codes_to_join) + \
-                   self.__encode_uint16(len(send_response_to)) + \
-                   send_response_to
-
+        filtered_header = self.__encode_uint16(trip_len) + type_join + \
+                          self.__encode_uint16(number_codes_to_join) + \
+                          self.__encode_uint16(len(send_response_to)) + \
+                          send_response_to
+        filtered_trips = b''
         for trip in divided_trips:
             encoded_year_id = trip[YEAR_ID_POS:]
             decoded_year_id = self.__decode_uint16(encoded_year_id)
             if decoded_year_id == self._first_year_compare or decoded_year_id == self._second_year_compare:
-                filtered += encoded_year_id
-                filtered += trip[START_CODE_POS: START_CODE_POS + CODE_LEN]
-        logging.info(f"filtered: {filtered}")
-        self._channel.basic_publish(exchange='stations_joiner', 
-                                    routing_key=city, body=header+filtered)
+                filtered_trips += encoded_year_id
+                filtered_trips += trip[START_CODE_POS: START_CODE_POS + CODE_LEN]
+        if len(filtered_trips) > 0:
+            logging.info(f"mandando {header} | {filtered_header} | {filtered_trips}")
+            self._channel.basic_publish(exchange='stations_joiner', 
+                                        routing_key=city, body=header+filtered_header+filtered_trips)
 
 
 

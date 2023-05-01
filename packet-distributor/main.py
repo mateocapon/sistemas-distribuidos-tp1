@@ -27,8 +27,8 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["first_year_compare"] = os.getenv('FIRST_YEAR_COMPARE', config["DEFAULT"]["FIRST_YEAR_COMPARE"])
-        config_params["second_year_compare"] = os.getenv('SECOND_YEAR_COMPARE', config["DEFAULT"]["SECOND_YEAR_COMPARE"])
+        config_params["first_year_compare"] = int(os.getenv('FIRST_YEAR_COMPARE', config["DEFAULT"]["FIRST_YEAR_COMPARE"]))
+        config_params["second_year_compare"] = int(os.getenv('SECOND_YEAR_COMPARE', config["DEFAULT"]["SECOND_YEAR_COMPARE"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:

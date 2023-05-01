@@ -171,6 +171,23 @@ services:
       rabbitmq:
         condition: service_healthy
 
+
+  trips-per-year:
+    container_name: trips-per-year
+    image: trips-per-year:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - CITY=montreal
+      - FIRST_YEAR_COMPARE=2016
+      - SECOND_YEAR_COMPARE=2017
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
 networks:
   testing_net:
     ipam:

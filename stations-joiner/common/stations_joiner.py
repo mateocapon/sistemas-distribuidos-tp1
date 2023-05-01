@@ -11,9 +11,9 @@ UINT16_SIZE = 2
 STATIONS_JOINER_ACK = b'K'
 STATIONS_JOINER_EOF = b'XXXXJ'
 TYPE_JOIN_ONLY_NAME = b'N'
-TYPE_JOIN_POS = 3
-N_CODES_JOIN_POS = 4
-RESPONSE_QUEUE_POS = 6
+TYPE_JOIN_POS = 2
+N_CODES_JOIN_POS = 3
+RESPONSE_QUEUE_POS = 5
 
 NAME_POS = 0
 
@@ -37,6 +37,9 @@ class StationsJoiner:
         self._trips_queue_name = result.method.queue
         self._channel.queue_bind(
             exchange='stations_joiner', queue=self._trips_queue_name, routing_key=city)
+
+        # join results to produce
+        self._channel.exchange_declare(exchange='stations-join-results', exchange_type='topic')
 
         self._chunks_received = 0
         self._last_chunk_number = -1
@@ -70,7 +73,8 @@ class StationsJoiner:
         send_response_to = self.__decode_string(trips_data[RESPONSE_QUEUE_POS:])
 
         trips_data = trips_data[RESPONSE_QUEUE_POS + UINT16_SIZE +len(send_response_to):]
-        logging.info(f"Voy a analizar: {trips_data}")
+        logging.info(f"Each t len: {each_trip_len} | type_join: {type_join} | {number_codes_to_join}"
+                     f"El response es: {send_response_to} | data: {trips_data}")
         join_results = b''
         for trip_pos in range(0, len(trips_data), each_trip_len):
             current_trip = trips_data[trip_pos:trip_pos+each_trip_len]
@@ -86,7 +90,11 @@ class StationsJoiner:
                 current_trip += joined 
             if join_success:
                 join_results += current_trip
-        logging.info(f"JOin results: {join_results}")
+        logging.info(f"estaria para mandar: {join_results}")
+        self._channel.basic_publish(exchange='stations-join-results',
+                                    routing_key=send_response_to.decode("utf-8")+"."+self._city,
+                                    body=join_results)
+
 
 
     def __get_joined(self, code, year_id, type_join):
@@ -96,7 +104,9 @@ class StationsJoiner:
             return None
         value = self._stations[key]
         if type_join == TYPE_JOIN_ONLY_NAME[0]:
-            return value[NAME_POS]
+            name = value[NAME_POS]
+            len_name = self.__encode_uint16(len(name))
+            return len_name + name
 
 
     def __stations_callback(self, ch, method, properties, body):
@@ -144,6 +154,9 @@ class StationsJoiner:
 
     def __decode_uint16(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
+
+    def __encode_uint16(self, to_encode):
+        return to_encode.to_bytes(UINT16_SIZE, "big")
 
     def __decode_string(self, to_decode):
         size_string = self.__decode_uint16(to_decode[:UINT16_SIZE])

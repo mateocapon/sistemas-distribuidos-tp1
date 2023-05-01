@@ -1,15 +1,21 @@
 import pika
 import logging
 
+FIRST_YEAR_COMPARE_POS = 0
+SECOND_YEAR_COMPARE_POS = 1
+
+UINT16_SIZE = 2
 
 class TripsPerYear:
-    def __init__(self, city):
+    def __init__(self, city, first_year_compare, second_year_compare):
+        self._first_year_compare = first_year_compare
+        self._second_year_compare = second_year_compare
+
         self._connection = pika.BlockingConnection(
                                 pika.ConnectionParameters(host='rabbitmq', heartbeat=1200))
         self._channel = self._connection.channel()
-        self._process_id = process_id
 
-        binding_key = "trips_per_year"+city
+        binding_key = "trips_per_year."+city
 
         # trips per year to consume
         self._channel.exchange_declare(exchange='stations-join-results', exchange_type='topic')
@@ -21,6 +27,8 @@ class TripsPerYear:
         # results to produce
         self._channel.queue_declare(queue='results-trips-per-year', durable=True)
 
+        self._stations_double_trips = {}
+
 
     def run(self):
         self._channel.basic_consume(queue=self._trips_year_queue_name, 
@@ -30,5 +38,44 @@ class TripsPerYear:
 
     def __trips_callback(self, ch, method, properties, body):
         logging.info(f"TODO: BODY: {body}")
+        current_pos = 0
+        max_pos = len(body)
+        while current_pos < max_pos:
+            trip_year = self.__decode_uint16(body[current_pos: current_pos+UINT16_SIZE])
+            current_pos = current_pos + 2*UINT16_SIZE # trip year and station code.
+            trip_name = self.__decode_string(body[current_pos:])
+            current_pos = current_pos + UINT16_SIZE + len(trip_name)
+            self.__process_trip(trip_name, trip_year)
+            logging.info(f"name: {trip_name}| year: {trip_year}")
+            #logging.info(f"name_decoded: {trip_name.decode("utf-8")}| year: {trip_year}")
+
+
+    def __process_trip(self, name, yearid):
+        trips_in_station = (0,0, False)
+        if name in self._stations_double_trips:
+            trips_in_station = self._stations_double_trips[name]
+        first_year = trips_in_station[FIRST_YEAR_COMPARE_POS]
+        second_year = trips_in_station[SECOND_YEAR_COMPARE_POS]
+        
+        if yearid == self._first_year_compare:
+            first_year += 1
+        elif yearid == self._second_year_compare:
+            second_year += 1
+
+        double = first_year < 2 * second_year
+        self._stations_double_trips[name] = (first_year, second_year, double)
+
+
+    def __decode_uint32(self, to_decode):
+        return int.from_bytes(to_decode, byteorder='big')
+
+    def __decode_uint16(self, to_decode):
+        return int.from_bytes(to_decode, byteorder='big')
+
+    def __decode_string(self, to_decode):
+        size_string = self.__decode_uint16(to_decode[:UINT16_SIZE])
+        decoded = to_decode[UINT16_SIZE: UINT16_SIZE + size_string]
+        return decoded
+
     def __del__(self):
         self._connection.close()
