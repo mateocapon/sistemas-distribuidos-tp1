@@ -4,15 +4,19 @@ import logging
 SERVER_ACK = b'S'
 WEATHER_FILTER_EOF = b'XXXXE'
 AVERAGE_DURATION_EOF = b'E'
+TRIPS_PER_YEAR_EOF = b'E'
 
 #Add some X's because the TYPE_POS = 4.
 PACKET_DISTRIBUTOR_EOF = b'XXXXF'
+STATIONS_JOINER_EOF = b'XXXXJ'
 
 PACKET_DISTRIBUTOR_ACK = b'A'
 WEATHER_FILTER_ACK = b'B'
+STATIONS_JOINER_ACK = b'K'
 
 class EOFManager:
-    def __init__(self, cities, n_packet_distributor, n_filter_per_city, n_duration_average):
+    def __init__(self, cities, n_packet_distributor, n_filter_per_city,
+                 n_station_joiner_per_city, n_duration_average):
         self._connection = pika.BlockingConnection(
                                 pika.ConnectionParameters(host='rabbitmq'))
         self._channel = self._connection.channel()
@@ -29,6 +33,12 @@ class EOFManager:
         # average duration queue to send eof
         self._channel.exchange_declare(exchange='trips_duration', exchange_type='direct')
 
+        # stations joiner to send eof
+        self._channel.exchange_declare(exchange='stations_joiner', exchange_type='direct')
+
+        # trips per year to send eof
+        self._channel.exchange_declare(exchange='stations-join-results', exchange_type='topic')
+
 
         self._n_packet_distributor = n_packet_distributor
         self._ack_packet_distributor = 0
@@ -36,6 +46,12 @@ class EOFManager:
         self._n_filter_per_city = n_filter_per_city
         self._ack_weather_filter = 0
         self._n_weather_filter = sum(n_filter_per_city.values())
+        self._weather_filter_finished = False
+
+        self._n_station_joiner_per_city = n_station_joiner_per_city
+        self._ack_stations_joiner = 0
+        self._n_stations_joiner = sum(n_station_joiner_per_city.values())
+        self._stations_joiner_finished = False
 
         self._n_duration_average = n_duration_average
         self._cities = cities
@@ -56,12 +72,21 @@ class EOFManager:
             self._ack_packet_distributor += 1
             if self._ack_packet_distributor == self._n_packet_distributor:
                 self.__broadcast_weather_filter_eof()
+                self.__broadcast_stations_joiner_eof()
         elif type_message == WEATHER_FILTER_ACK[0]:
             logging.info(f'action: eof_ack | result: received | from: weather_filter')
             self._ack_weather_filter += 1
             if self._ack_weather_filter == self._n_weather_filter:
+                self._weather_filter_finished = True
                 self.__broadcast_average_duration_eof()
-                self._channel.stop_consuming()
+        elif type_message == STATIONS_JOINER_ACK[0]:
+            logging.info(f'action: eof_ack | result: received | from: stations_joiner')
+            self._ack_stations_joiner += 1
+            if self._ack_stations_joiner == self._n_stations_joiner:
+                self._stations_joiner_finished = True
+                self.__broadcast_trips_per_year_eof()
+        if self._weather_filter_finished and self._stations_joiner_finished:
+            self._channel.stop_consuming()
 
 
 
@@ -83,11 +108,24 @@ class EOFManager:
                 self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
                                             routing_key=city, body=WEATHER_FILTER_EOF)
     
+    def __broadcast_stations_joiner_eof(self):
+        logging.info(f'action: broadcast_eof | to: stations_joiner')
+        for city in self._cities:
+            for process in range(self._n_station_joiner_per_city[city]):
+                self._channel.basic_publish(exchange='stations_joiner', 
+                                            routing_key=city, body=STATIONS_JOINER_EOF)
+
     def __broadcast_average_duration_eof(self):
         logging.info(f'action: broadcast_eof | to: average_duration')
         for average_id in range(self._n_duration_average):
             self._channel.basic_publish(exchange='trips_duration', 
                           routing_key=str(average_id), body=AVERAGE_DURATION_EOF)
+        
+    def __broadcast_trips_per_year_eof(self):
+        logging.info(f'action: broadcast_eof | to: trips_per_year')
+        for city in self._cities:
+            self._channel.basic_publish(exchange='stations-join-results', 
+                          routing_key="trips_per_year."+city, body=TRIPS_PER_YEAR_EOF)
         
     def __del__(self):
         self._connection.close()

@@ -62,12 +62,12 @@ class DurationStorage:
     
     def __send_results(self):
         logging.info(f"Los results son {self._average_durations}")
-        resuls = b''
+        results = b''
         for key, value in self._average_durations.items():
-            resuls += key
-            resuls += self.__encode_float(value[0])
+            results += key
+            results += self.__encode_float(value[0])
 
-        self._channel.basic_publish(exchange='', routing_key='results-collector-average-duration', body=resuls)
+        self._channel.basic_publish(exchange='', routing_key='results-collector-average-duration', body=results)
         self._channel.stop_consuming()
 
 

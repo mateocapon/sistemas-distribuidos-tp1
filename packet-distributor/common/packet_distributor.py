@@ -77,6 +77,9 @@ class PacketDistributor:
         # init trips exchange for the average time pipeline
         self._channel.exchange_declare(exchange='trips_pipeline_average_time_weather', exchange_type='direct')
 
+        # init trips exchange for stations joiner
+        self._channel.exchange_declare(exchange='stations_joiner', exchange_type='direct')
+
         # queue to send eof ACK.
         self._channel.queue_declare(queue='eof-manager', durable=True)
 

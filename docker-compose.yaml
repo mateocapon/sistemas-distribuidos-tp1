@@ -150,6 +150,7 @@ services:
       - N_PACKET_DISTRIBUTOR=2
       - CITIES=montreal
       - N_WEATHER_FILTER_PER_CITY=2
+      - N_STATIONS_JOINER_PER_CITY=1
       - NUMBER_AVERAGE_DURATION_PROCESSES=2
     networks:
       - testing_net

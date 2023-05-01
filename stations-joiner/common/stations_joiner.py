@@ -11,6 +11,7 @@ UINT16_SIZE = 2
 STATIONS_JOINER_ACK = b'K'
 STATIONS_JOINER_EOF = b'XXXXJ'
 TYPE_JOIN_ONLY_NAME = b'N'
+TRIPS_PACKET = b'T'
 TYPE_JOIN_POS = 2
 N_CODES_JOIN_POS = 3
 RESPONSE_QUEUE_POS = 5
@@ -62,8 +63,10 @@ class StationsJoiner:
 
 
     def __trips_callback(self, ch, method, properties, body):
+        logging.info(f"me llego: {body}")
         if body[TYPE_POS] == STATIONS_JOINER_EOF[TYPE_POS]:
             self.__process_eof()
+            ch.basic_ack(delivery_tag=method.delivery_tag)
             return
         trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
         logging.info(f"Me llego este trips: {trips_data}")
@@ -93,7 +96,8 @@ class StationsJoiner:
         logging.info(f"estaria para mandar: {join_results}")
         self._channel.basic_publish(exchange='stations-join-results',
                                     routing_key=send_response_to.decode("utf-8")+"."+self._city,
-                                    body=join_results)
+                                    body=TRIPS_PACKET+join_results)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
 

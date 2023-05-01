@@ -3,6 +3,12 @@ import logging
 
 FIRST_YEAR_COMPARE_POS = 0
 SECOND_YEAR_COMPARE_POS = 1
+DOUBLE_POS = 2
+
+TRIPS_PER_YEAR_EOF = b'E'
+
+TRUE_ENCODED = b'T'
+FALSE_ENCODED = b'F'
 
 UINT16_SIZE = 2
 
@@ -14,7 +20,7 @@ class TripsPerYear:
         self._connection = pika.BlockingConnection(
                                 pika.ConnectionParameters(host='rabbitmq', heartbeat=1200))
         self._channel = self._connection.channel()
-
+        self._city = city
         binding_key = "trips_per_year."+city
 
         # trips per year to consume
@@ -25,7 +31,7 @@ class TripsPerYear:
             exchange='stations-join-results', queue=self._trips_year_queue_name, routing_key=binding_key)
 
         # results to produce
-        self._channel.queue_declare(queue='results-trips-per-year', durable=True)
+        self._channel.queue_declare(queue='results-collector-trips-per-year', durable=True)
 
         self._stations_double_trips = {}
 
@@ -38,7 +44,11 @@ class TripsPerYear:
 
     def __trips_callback(self, ch, method, properties, body):
         logging.info(f"TODO: BODY: {body}")
-        current_pos = 0
+        type_message = body[0]
+        if type_message == TRIPS_PER_YEAR_EOF[0]:
+            self.__send_results()
+            return
+        current_pos = 1
         max_pos = len(body)
         while current_pos < max_pos:
             trip_year = self.__decode_uint16(body[current_pos: current_pos+UINT16_SIZE])
@@ -47,7 +57,6 @@ class TripsPerYear:
             current_pos = current_pos + UINT16_SIZE + len(trip_name)
             self.__process_trip(trip_name, trip_year)
             logging.info(f"name: {trip_name}| year: {trip_year}")
-            #logging.info(f"name_decoded: {trip_name.decode("utf-8")}| year: {trip_year}")
 
 
     def __process_trip(self, name, yearid):
@@ -66,11 +75,34 @@ class TripsPerYear:
         self._stations_double_trips[name] = (first_year, second_year, double)
 
 
+
+    def __send_results(self):
+        logging.info(f"Los results son {self._stations_double_trips}")
+
+        results = self.__encode_string(self._city)
+        for key, value in self._stations_double_trips.items():
+            results += key
+            results += self.__encode_bool(value[DOUBLE_POS])
+
+        self._channel.basic_publish(exchange='', routing_key='results-collector-trips-per-year', body=results)
+        self._channel.stop_consuming()
+
+
     def __decode_uint32(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
 
     def __decode_uint16(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
+
+    def __encode_bool(self, to_encode):
+        if to_encode:
+            return TRUE_ENCODED
+        return FALSE_ENCODED
+
+    def __encode_string(self, to_encode):
+        encoded = to_encode.encode('utf-8')
+        size = len(encoded).to_bytes(UINT16_SIZE, "big")
+        return size + encoded
 
     def __decode_string(self, to_decode):
         size_string = self.__decode_uint16(to_decode[:UINT16_SIZE])

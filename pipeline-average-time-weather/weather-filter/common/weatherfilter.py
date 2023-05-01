@@ -94,6 +94,7 @@ class WeatherFilter:
     def __trips_callback(self, ch, method, properties, body):
         if body[TYPE_POS] == WEATHER_FILTER_EOF[TYPE_POS]:
             self.__process_eof()
+            ch.basic_ack(delivery_tag=method.delivery_tag)
             return
         trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
         data_for_average_duration = [b'' for i in range(self._n_average_duration_processes)]
