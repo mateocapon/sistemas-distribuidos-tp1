@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.packet_distributor import PacketDistributor
+from common.stations_joiner import StationsJoiner
 import logging
 import os
 
@@ -27,8 +27,7 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["first_year_compare"] = os.getenv('FIRST_YEAR_COMPARE', config["DEFAULT"]["FIRST_YEAR_COMPARE"])
-        config_params["second_year_compare"] = os.getenv('SECOND_YEAR_COMPARE', config["DEFAULT"]["SECOND_YEAR_COMPARE"])
+        config_params["city"] = os.getenv('CITY', config["DEFAULT"]["CITY"])
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -40,18 +39,18 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-    first_year_compare = config_params["first_year_compare"]
-    second_year_compare = config_params["second_year_compare"]
-
+    city = config_params["city"]
+    
     initialize_log(logging_level)
 
     # Log config parameters at the beginning of the program to verify the configuration
     # of the component
-    logging.debug(f"action: config | result: success | logging_level: {logging_level}")
+    logging.debug(f"action: config | result: success | logging_level: {logging_level} |"
+                  f"city: {city} ")
 
     try:
-        distributor = PacketDistributor(first_year_compare, second_year_compare)
-        distributor.run()
+        stations_joiner = StationsJoiner(city)
+        stations_joiner.run()
     except OSError as e:
         logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
 

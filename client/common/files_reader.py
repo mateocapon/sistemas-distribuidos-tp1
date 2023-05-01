@@ -6,6 +6,7 @@ from common.trip import Trip
 from common.protocol import Protocol
 from common.station import Station
 from common.weather import Weather
+import time
 
 INVALID_TRIP_STATION = "-1"
 
@@ -32,13 +33,16 @@ class FilesReader:
         signal.signal(signal.SIGTERM, self.__stop_reader)
 
     def process_files(self, city):
+        start = time.time()
         logging.debug("en reader")
         if not city:
             return False
         self.__process_stations(city)
         self.__process_weather(city)
         self.__process_trips(city)
-        
+        end = time.time()
+        logging.info(f"action: process_files | city: {city} | time: {end - start}")
+
 
     def __process_stations(self, city):
         file_path = "data/" + city + "/stations.csv"

@@ -51,8 +51,16 @@ START_DATE_TRIP_LEN = 10
 DURATION_TRIP_POS = 42
 DURATION_TRIP_LEN = 4
 
+YEAR_ID_POS = -2
+CODE_LEN = 2
+YEAR_ID_LEN = 2
+TYPE_JOIN_ONLY_NAME = b'N'
+
 class PacketDistributor:
-    def __init__(self):
+    def __init__(self, first_year_compare, second_year_compare):
+        self._first_year_compare = first_year_compare
+        self._second_year_compare = second_year_compare
+
         # init queue to consume
         self._connection = pika.BlockingConnection(
                             pika.ConnectionParameters(host='rabbitmq', heartbeat=1200))
@@ -61,6 +69,9 @@ class PacketDistributor:
 
         # init weather exchange to produce
         self._channel.exchange_declare(exchange='weather_registries', exchange_type='direct')
+
+        # init stations exchange to produce
+        self._channel.exchange_declare(exchange='stations_registries', exchange_type='direct')
 
         # init trips exchange for the average time pipeline
         self._channel.exchange_declare(exchange='trips_pipeline_average_time_weather', exchange_type='direct')
@@ -94,12 +105,22 @@ class PacketDistributor:
         city = self.__decode_city(chunk)
         start_trips_data = UINT32_SIZE + TYPE_SIZE +  UINT16_SIZE + len(city)
         trips_data = chunk[start_trips_data:]
-        filtered_day_duration = self.__filter_day_duration(trips_data)
-        self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
-                                    routing_key=city, body=header+filtered_day_duration)
+        divided_trips = [trips_data[i:i+TRIP_DATA_LEN] 
+                         for i in range(0, len(trips_data), TRIP_DATA_LEN)]
+
+        self.__send_filter_day_duration(header, city, divided_trips)
+        self.__send_filter_years_compare(header, city, divided_trips)
+
+
 
     def __process_stations_chunk(self, chunk):
-        logging.debug(f"TODO")
+        header = chunk[NUMBER_CHUNK_POS: UINT32_SIZE + TYPE_SIZE]
+        city = self.__decode_city(chunk)
+        start_stations_data = UINT32_SIZE + TYPE_SIZE +  UINT16_SIZE + len(city)
+        stations_data = chunk[start_stations_data:]  
+        self._channel.basic_publish(exchange='stations_registries', 
+                                    routing_key=city, body=header+stations_data)
+
 
     def __process_weather_chunk(self, chunk):
         header = chunk[NUMBER_CHUNK_POS: UINT32_SIZE + TYPE_SIZE]
@@ -117,16 +138,39 @@ class PacketDistributor:
                                     routing_key=city, body=header+joined_data)
 
 
-
-
-    def __filter_day_duration(self, trips_chunk):
-        divided_trips = [trips_chunk[i:i+TRIP_DATA_LEN] 
-                         for i in range(0, len(trips_chunk), TRIP_DATA_LEN)]
-        
+    def __send_filter_day_duration(self, header, city, divided_trips):
         filtered_day_duration = [s[START_DATE_TRIP_POS:START_DATE_TRIP_POS+START_DATE_TRIP_LEN] + 
                                  s[DURATION_TRIP_POS:DURATION_TRIP_POS+DURATION_TRIP_LEN]
                                  for s in divided_trips]
-        return b''.join(filtered_day_duration)
+        filtered_day_duration = b''.join(filtered_day_duration)
+        self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
+                                    routing_key=city, body=header+filtered_day_duration)
+
+
+    def __send_filter_years_compare(self, header, city, divided_trips):
+        # header for stations joiner.
+        trip_len = CODE_LEN + YEAR_ID_LEN
+        type_join = TYPE_JOIN_ONLY_NAME
+        #join only by start code.
+        number_codes_to_join = 1
+        send_response_to = "trips_per_year".encode('utf-8')
+        filtered = b''
+
+        filtered = filtered + self.__encode_uint16(trip_len) + type_join + \
+                   self.__encode_uint16(number_codes_to_join) + \
+                   self.__encode_uint16(len(send_response_to)) + \
+                   send_response_to
+
+        for trip in divided_trips:
+            encoded_year_id = trip[YEAR_ID_POS:]
+            decoded_year_id = self.__decode_uint16(encoded_year_id)
+            if decoded_year_id == self._first_year_compare or decoded_year_id == self._second_year_compare:
+                filtered += encoded_year_id
+                filtered += trip[START_CODE_POS: START_CODE_POS + CODE_LEN]
+        logging.info(f"filtered: {filtered}")
+        self._channel.basic_publish(exchange='stations_joiner', 
+                                    routing_key=city, body=header+filtered)
+
 
 
     def __process_eof(self):
@@ -153,6 +197,10 @@ class PacketDistributor:
 
     def __decode_uint16(self, to_decode):
         return int.from_bytes(to_decode, byteorder='big')
+
+    def __encode_uint16(self, to_encode):
+        return to_encode.to_bytes(UINT16_SIZE, "big")
+
 
     def __del__(self):
         self._connection.close()

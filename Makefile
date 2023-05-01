@@ -7,6 +7,7 @@ docker-image:
 	docker build -f ./pipeline-average-time-weather/average-duration/Dockerfile -t "average-duration:latest" .
 	docker build -f ./pipeline-average-time-weather/results-collector/Dockerfile -t "results-collector-average:latest" .
 	docker build -f ./eof-manager/Dockerfile -t "eof-manager:latest" .
+	docker build -f ./stations-joiner/Dockerfile -t "stations-joiner:latest" .
 	# Execute this command from time to time to clean up intermediate stages generated 
 	# during client build (your hard drive will like this :) ). Don't left uncommented if you 
 	# want to avoid rebuilding client image every time the docker-compose-up command 
@@ -27,4 +28,6 @@ docker-compose-logs:
 	docker compose -f docker-compose.yaml logs -f
 .PHONY: docker-compose-logs
 
-
+run-client:
+	docker run --rm -v $(pwd)./.data/dev:/data client:latest
+.PHONY: docker-compose-logs

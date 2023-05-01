@@ -46,7 +46,7 @@ class WeatherFilter:
 
         # trips registries to consume
         self._channel.exchange_declare(exchange='trips_pipeline_average_time_weather', exchange_type='direct')
-        result = self._channel.queue_declare(queue=city, durable=True)
+        result = self._channel.queue_declare(queue=city+"-weatherfilter", durable=True)
         self._trips_queue_name = result.method.queue
         self._channel.queue_bind(
             exchange='trips_pipeline_average_time_weather', queue=self._trips_queue_name, routing_key=city)
@@ -97,13 +97,11 @@ class WeatherFilter:
             return
         trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
         data_for_average_duration = [b'' for i in range(self._n_average_duration_processes)]
-        
         for i in range(0, len(trips_data), TRIP_DATA_LEN):
             trip = trips_data[i:i+TRIP_DATA_LEN]
             trip_date = datetime.date.fromisoformat(trip[:DATE_TRIP_LEN].decode('utf-8'))
             if trip_date in self._weather_registries:
                 queue_to_send = hash(trip_date) % self._n_average_duration_processes
-                #logging.info(f"El date {trip_date} va a {queue_to_send}")
                 data_for_average_duration[queue_to_send] += trip
 
         for queue_to_send, data in enumerate(data_for_average_duration):
