@@ -63,21 +63,17 @@ class StationsJoiner:
 
 
     def __trips_callback(self, ch, method, properties, body):
-        logging.info(f"me llego: {body}")
         if body[TYPE_POS] == STATIONS_JOINER_EOF[TYPE_POS]:
             self.__process_eof()
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
         trips_data = body[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
-        logging.info(f"Me llego este trips: {trips_data}")
         each_trip_len = self.__decode_uint16(trips_data[:UINT16_SIZE])
         type_join = trips_data[TYPE_JOIN_POS]
         number_codes_to_join = self.__decode_uint16(trips_data[N_CODES_JOIN_POS:N_CODES_JOIN_POS+UINT16_SIZE])
         send_response_to = self.__decode_string(trips_data[RESPONSE_QUEUE_POS:])
 
         trips_data = trips_data[RESPONSE_QUEUE_POS + UINT16_SIZE +len(send_response_to):]
-        logging.info(f"Each t len: {each_trip_len} | type_join: {type_join} | {number_codes_to_join}"
-                     f"El response es: {send_response_to} | data: {trips_data}")
         join_results = b''
         for trip_pos in range(0, len(trips_data), each_trip_len):
             current_trip = trips_data[trip_pos:trip_pos+each_trip_len]

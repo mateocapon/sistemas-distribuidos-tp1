@@ -4,6 +4,7 @@ import logging
 FIRST_YEAR_COMPARE_POS = 0
 SECOND_YEAR_COMPARE_POS = 1
 DOUBLE_POS = 2
+UINT32_SIZE = 4
 
 TRIPS_PER_YEAR_EOF = b'E'
 
@@ -69,7 +70,7 @@ class TripsPerYear:
         elif yearid == self._second_year_compare:
             second_year += 1
 
-        double = first_year < 2 * second_year
+        double = first_year * 2 <  second_year
         self._stations_double_trips[name] = (first_year, second_year, double)
 
 
@@ -78,10 +79,14 @@ class TripsPerYear:
         logging.info(f"Los results son {self._stations_double_trips}")
         city = self.__encode_string(self._city)
         results = b''
+        n_results = 0
         for key, value in self._stations_double_trips.items():
-            if value[DOUBLE_POS]:
+            if value[DOUBLE_POS] and value[FIRST_YEAR_COMPARE_POS] > 0:
                 results += self.__encode_string(key.decode('utf-8'))
-        len_results = self.__encode_uint16(len(results))
+                results += self.__encode_uint32(value[FIRST_YEAR_COMPARE_POS])
+                results += self.__encode_uint32(value[SECOND_YEAR_COMPARE_POS])
+                n_results += 1
+        len_results = self.__encode_uint16(n_results)
         self._channel.basic_publish(exchange='', 
                                     routing_key='results-collector-trips-per-year',
                                     body=city+len_results+results)
@@ -101,6 +106,9 @@ class TripsPerYear:
 
     def __encode_uint16(self, to_encode):
         return to_encode.to_bytes(UINT16_SIZE, "big")
+
+    def __encode_uint32(self, to_encode):
+        return to_encode.to_bytes(UINT32_SIZE, "big")
 
     def __decode_string(self, to_decode):
         size_string = self.__decode_uint16(to_decode[:UINT16_SIZE])

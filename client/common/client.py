@@ -5,7 +5,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 from common.files_reader import files_reader
 import time
-from common.protocol import Protocol, RESULTS_AVERAGE_DURATION
+from common.protocol import Protocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PER_YEAR
 
 class Client:
     def __init__(self, server_ip, server_port, n_readers, cities,
@@ -71,7 +71,14 @@ class Client:
         for type_result, result in results:
             if type_result == RESULTS_AVERAGE_DURATION[0]:
                 logging.info(f"La duración promedio de viajes que iniciaron en días con precipitaciones mayores a 30mm.")
+                logging.info(f"Cantidad de fechas: {len(result)}")
                 logging.info(result)
+            elif type_result == RESULTS_TRIPS_PER_YEAR[0]:
+                logging.info(f"Los nombres de las estaciones que al menos duplicaron la cantidad de viajes iniciados en"
+                              "ellas entre 2016 y el 2017.")
+                n_stations = sum([len(city_data[1]) for city_data in result])
+                logging.info(f"Cantidad de estaciones: {n_stations}")
+                logging.info(f"{result}")
             else:
                 logging.info(f"res: {result}")
 

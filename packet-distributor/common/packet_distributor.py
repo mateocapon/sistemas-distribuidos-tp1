@@ -170,7 +170,6 @@ class PacketDistributor:
                 filtered_trips += encoded_year_id
                 filtered_trips += trip[START_CODE_POS: START_CODE_POS + CODE_LEN]
         if len(filtered_trips) > 0:
-            logging.info(f"mandando {header} | {filtered_header} | {filtered_trips}")
             self._channel.basic_publish(exchange='stations_joiner', 
                                         routing_key=city, body=header+filtered_header+filtered_trips)
 

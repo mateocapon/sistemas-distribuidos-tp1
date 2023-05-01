@@ -9,6 +9,8 @@ class Trip:
         self.end_date = end_date
         self.end_station_code = int(end_station_code)
         self.duration_sec = float(duration_sec)
+        if self.duration_sec < 0:
+            self.duration_sec = 0.0
         self.is_member = int(is_member)
         self.yearid = int(yearid)
 

@@ -6,7 +6,6 @@ import multiprocessing as mp
 from common.clienthandler import handle_client_connection
 from common.resultshandler import wait_for_results
 from common.protocol import Protocol
-import time
 
 class Server:
     def __init__(self, port, listen_backlog, n_workers, n_cities, n_queries):
@@ -36,7 +35,6 @@ class Server:
         resultshandler.start()
 
         results_received = 0 
-        polling_sleep_time = 1
         protocol = Protocol()
         while results_received < self._n_queries:
             client_sock = self.__accept_new_connection()
@@ -48,8 +46,6 @@ class Server:
                 except queue.Empty:
                     results_received += len(results)
                     protocol.send_results(client_sock, results)
-                    time.sleep(polling_sleep_time)
-                    polling_sleep_time = polling_sleep_time * 2
                     break
             client_sock.close()
         resultshandler.join()

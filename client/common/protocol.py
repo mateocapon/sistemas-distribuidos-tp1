@@ -5,7 +5,8 @@ import datetime
 UINT16_SIZE = 2
 INT16_SIZE = 2
 INT32_SIZE = 4
-SCALE_FLOAT = 1000
+UINT32_SIZE = 4
+SCALE_FLOAT = 100
 
 # YYYY-MM-DD HH:MM:SS
 DATE_TRIP_LEN = 19
@@ -23,6 +24,8 @@ LAST_CHUNK_TRIPS = b'C'
 GET_RESULTS_MESSAGE = 'R'
 
 RESULTS_AVERAGE_DURATION = b'A'
+RESULTS_TRIPS_PER_YEAR = b'Y'
+
 
 TYPE_POS = 0
 TYPE_LEN = 1
@@ -133,7 +136,8 @@ class Protocol:
         type_result = res[TYPE_POS]
         if type_result == RESULTS_AVERAGE_DURATION[0]:
             res = self.__receive_average_durations(skt, res[TYPE_POS+TYPE_LEN:])
-            logging.info("recibiendo data de average results")
+        elif type_result == RESULTS_TRIPS_PER_YEAR[0]:
+            res = self.__receive_stations_double_trips(skt, res[TYPE_POS+TYPE_LEN:])
         return (type_result, res)
 
     def __receive_average_durations(self, skt, all_results):
@@ -142,6 +146,27 @@ class Protocol:
             date = all_results[i:i+DATE_WEATHER_LEN].decode("utf-8")
             average_duration = self.__decode_float(all_results[i+DATE_WEATHER_LEN: i+DATE_WEATHER_LEN+INT32_SIZE])
             res.append((date, average_duration))
+        return res
+    
+    def __receive_stations_double_trips(self, skt, all_results):
+        res = []
+        len_results = len(all_results)
+        next_pos_to_process = 0
+        while next_pos_to_process < len_results:
+            city = self.__decode_string(all_results[next_pos_to_process:])
+            next_pos_to_process = next_pos_to_process + len(city) + UINT16_SIZE
+            n_stations = self.__read_uint16(all_results[next_pos_to_process:next_pos_to_process+UINT16_SIZE])
+            next_pos_to_process = next_pos_to_process + UINT16_SIZE
+            stations_stats = []
+            for i in range(n_stations):
+                station = self.__decode_string(all_results[next_pos_to_process:])
+                next_pos_to_process = next_pos_to_process + len(station) + UINT16_SIZE
+                first_year_compare = self.__read_uint32(all_results[next_pos_to_process:next_pos_to_process+UINT32_SIZE])
+                next_pos_to_process += UINT32_SIZE
+                second_year_compare = self.__read_uint32(all_results[next_pos_to_process:next_pos_to_process+UINT32_SIZE])
+                next_pos_to_process += UINT32_SIZE
+                stations_stats.append((station.decode("utf-8"), first_year_compare, second_year_compare))
+            res.append((city.decode("utf-8"), stations_stats))
         return res
 
 
@@ -157,12 +182,18 @@ class Protocol:
         return encoded
 
     def __encode_float(self, to_encode):
-        return int(to_encode * SCALE_FLOAT).to_bytes(INT32_SIZE, "big", signed = True)
-
+        try:
+            return int(to_encode * SCALE_FLOAT).to_bytes(INT32_SIZE, "big", signed = True)
+        except:
+            logging.error(f"Error al encodear: {to_encode}")
 
     def __decode_float(self, to_decode):
         return float(int.from_bytes(to_decode, "big")) / SCALE_FLOAT
 
+    def __decode_string(self, to_decode):
+        size_string = int.from_bytes(to_decode[:UINT16_SIZE], byteorder='big')
+        decoded = to_decode[UINT16_SIZE: UINT16_SIZE + size_string]
+        return decoded
 
     def __encode_uint16(self, to_encode):
         return to_encode.to_bytes(UINT16_SIZE, "big")
@@ -177,6 +208,11 @@ class Protocol:
                             f" max_package_size: {self._max_package_size}")
         socket.sendall(msg)
 
+    def __read_uint16(self, to_decode):
+        return int.from_bytes(to_decode, byteorder='big')
+
+    def __read_uint32(self, to_decode):
+        return int.from_bytes(to_decode, byteorder='big')
 
     def __decode_uint16(self, client_sock):
         len_data = self.__recvall(client_sock, UINT16_SIZE)
