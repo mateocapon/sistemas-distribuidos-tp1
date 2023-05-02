@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.packet_distributor import PacketDistributor
+from common.distance_calculator import DistanceCalculator
 import logging
 import os
 
@@ -27,9 +27,6 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["first_year_compare"] = int(os.getenv('FIRST_YEAR_COMPARE', config["DEFAULT"]["FIRST_YEAR_COMPARE"]))
-        config_params["second_year_compare"] = int(os.getenv('SECOND_YEAR_COMPARE', config["DEFAULT"]["SECOND_YEAR_COMPARE"]))
-        config_params["city_to_calc_distance"] = os.getenv('CITY_TO_CALC_DISTANCE', config["DEFAULT"]["CITY_TO_CALC_DISTANCE"])
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -41,9 +38,6 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-    first_year_compare = config_params["first_year_compare"]
-    second_year_compare = config_params["second_year_compare"]
-    city_to_calc_distance = config_params["city_to_calc_distance"]
 
     initialize_log(logging_level)
 
@@ -52,10 +46,10 @@ def main():
     logging.debug(f"action: config | result: success | logging_level: {logging_level}")
 
     try:
-        distributor = PacketDistributor(first_year_compare, second_year_compare, city_to_calc_distance)
-        distributor.run()
+        calculator = DistanceCalculator()
+        calculator.run()
     except OSError as e:
-        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
+        logging.error(f'action: initialize_distance_calculator | result: fail | error: {e}')
 
 def initialize_log(logging_level):
     """

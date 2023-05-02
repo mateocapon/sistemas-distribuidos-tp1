@@ -31,7 +31,10 @@ def initialize_config():
         config_params["number_packet_distributor"] = int(os.getenv('N_PACKET_DISTRIBUTOR', config["DEFAULT"]["N_PACKET_DISTRIBUTOR"]))
         config_params["n_weather_filter_per_city"] = os.getenv('N_WEATHER_FILTER_PER_CITY', config["DEFAULT"]["N_WEATHER_FILTER_PER_CITY"])
         config_params["n_stations_joiner_per_city"] = os.getenv('N_STATIONS_JOINER_PER_CITY', config["DEFAULT"]["N_STATIONS_JOINER_PER_CITY"])
+        config_params["join_parser_city"] = os.getenv('DISTANCES_JOIN_PARSER_CITY', config["DEFAULT"]["DISTANCES_JOIN_PARSER_CITY"])
         config_params["n_duration_average"] = int(os.getenv('NUMBER_AVERAGE_DURATION_PROCESSES', config["DEFAULT"]["NUMBER_AVERAGE_DURATION_PROCESSES"]))
+        config_params["n_distance_join_parser"] = int(os.getenv('N_DISTANCES_JOIN_PARSER', config["DEFAULT"]["N_DISTANCES_JOIN_PARSER"]))
+        config_params["n_distance_calculator"] = int(os.getenv('N_DISTANCE_CALCULATOR', config["DEFAULT"]["N_DISTANCE_CALCULATOR"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -48,6 +51,9 @@ def main():
     n_weather_filter_per_city = config_params["n_weather_filter_per_city"].split(',')
     n_stations_joiner_per_city = config_params["n_stations_joiner_per_city"].split(',')
     n_duration_average = config_params["n_duration_average"]
+    n_distance_join_parser = config_params["n_distance_join_parser"]
+    join_parser_city = config_params["join_parser_city"]
+    n_distance_calculator = config_params["n_distance_calculator"]
     weather_filter_per_city = {}
     stations_joiner_per_city = {}
     for i, city in enumerate(cities):
@@ -65,7 +71,8 @@ def main():
 
     try:
         eof_manager = EOFManager(cities, n_packet_distributor, weather_filter_per_city,
-                                 stations_joiner_per_city, n_duration_average)
+                                 stations_joiner_per_city, n_duration_average, 
+                                 n_distance_join_parser, join_parser_city, n_distance_calculator)
         eof_manager.run()
     except OSError as e:
         logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')

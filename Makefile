@@ -10,6 +10,8 @@ docker-image:
 	docker build -f ./stations-joiner/Dockerfile -t "stations-joiner:latest" .
 	docker build -f ./pipeline-trips-per-year/trips-per-year/Dockerfile -t "trips-per-year:latest" .
 	docker build -f ./pipeline-trips-per-year/results-collector/Dockerfile -t "results-collector-trips-per-year:latest" .
+	docker build -f ./pipeline-distances-montreal/distances-join-parser/Dockerfile -t "distances-join-parser:latest" .
+	docker build -f ./distance-calculator/Dockerfile -t "distance-calculator:latest" .
 	# Execute this command from time to time to clean up intermediate stages generated 
 	# during client build (your hard drive will like this :) ). Don't left uncommented if you 
 	# want to avoid rebuilding client image every time the docker-compose-up command 

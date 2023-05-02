@@ -55,13 +55,15 @@ YEAR_ID_POS = -2
 CODE_LEN = 2
 YEAR_ID_LEN = 2
 TYPE_JOIN_ONLY_NAME = b'N'
+TYPE_JOIN_ALL = b'A'
 START_CODE_POS = 19
+END_CODE_POS = 40
 
 class PacketDistributor:
-    def __init__(self, first_year_compare, second_year_compare):
+    def __init__(self, first_year_compare, second_year_compare, city_to_calc_distance):
         self._first_year_compare = first_year_compare
         self._second_year_compare = second_year_compare
-
+        self._city_to_calc_distance = city_to_calc_distance
         # init queue to consume
         self._connection = pika.BlockingConnection(
                             pika.ConnectionParameters(host='rabbitmq', heartbeat=1200))
@@ -114,6 +116,7 @@ class PacketDistributor:
 
         self.__send_filter_day_duration(header, city, divided_trips)
         self.__send_filter_years_compare(header, city, divided_trips)
+        self.__send_distance_query_trips(header, city, divided_trips)
 
 
 
@@ -149,6 +152,30 @@ class PacketDistributor:
         filtered_day_duration = b''.join(filtered_day_duration)
         self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
                                     routing_key=city, body=header+filtered_day_duration)
+
+
+    def __send_distance_query_trips(self, header, city, divided_trips):
+        if city.decode("utf-8") != self._city_to_calc_distance:
+            return
+        # header for stations joiner.
+        trip_len = YEAR_ID_LEN + 2 * CODE_LEN 
+        type_join = TYPE_JOIN_ALL
+        #join by start code and by end code.
+        number_codes_to_join = 2
+        send_response_to = "distances_join_parser".encode('utf-8')
+        filtered_header = self.__encode_uint16(trip_len) + type_join + \
+                          self.__encode_uint16(number_codes_to_join) + \
+                          self.__encode_uint16(len(send_response_to)) + \
+                          send_response_to
+        filtered_trips = b''
+        filtered_codes_year = [s[YEAR_ID_POS:] + 
+                                 s[START_CODE_POS: START_CODE_POS + CODE_LEN] + 
+                                 s[END_CODE_POS: END_CODE_POS + CODE_LEN]
+                                 for s in divided_trips]
+        filtered_codes_year = b''.join(filtered_codes_year)
+        logging.info(f"envio a query distances")
+        self._channel.basic_publish(exchange='stations_joiner', 
+                                    routing_key=city, body=header+filtered_header+filtered_codes_year)
 
 
     def __send_filter_years_compare(self, header, city, divided_trips):

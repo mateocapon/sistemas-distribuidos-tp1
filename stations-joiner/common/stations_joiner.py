@@ -11,12 +11,15 @@ UINT16_SIZE = 2
 STATIONS_JOINER_ACK = b'K'
 STATIONS_JOINER_EOF = b'XXXXJ'
 TYPE_JOIN_ONLY_NAME = b'N'
+TYPE_JOIN_ALL = b'A'
 TRIPS_PACKET = b'T'
 TYPE_JOIN_POS = 2
 N_CODES_JOIN_POS = 3
 RESPONSE_QUEUE_POS = 5
 
 NAME_POS = 0
+LATITUDE_POS = 1
+LONGITUDE_POS = 2
 
 class StationsJoiner:
     def __init__(self, city):
@@ -106,6 +109,16 @@ class StationsJoiner:
             name = value[NAME_POS]
             len_name = self.__encode_uint16(len(name))
             return len_name + name
+        else:
+        # type_join is equal to TYPE_JOIN_ALL
+            name = value[NAME_POS]
+            len_name = self.__encode_uint16(len(name))
+            latitude = value[LATITUDE_POS]
+            len_latitude = self.__encode_uint16(len(latitude))
+            longitude = value[LONGITUDE_POS]
+            len_longitude = self.__encode_uint16(len(longitude))
+            logging.info(f"Mando {latitude},{longitude}")
+            return len_name+name+len_latitude+latitude+len_longitude+longitude
 
 
     def __stations_callback(self, ch, method, properties, body):

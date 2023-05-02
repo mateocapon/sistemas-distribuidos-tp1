@@ -13,8 +13,9 @@ SECOND_YEAR_COMPARE=2017
 PRECTOT_COND=30
 
 NUMBER_AVERAGE_DURATION_PROCESSES=2
-
-
+N_DISTANCES_JOIN_PARSER=1
+CITY_TO_CALC_DISTANCE="montreal"
+N_DISTANCE_CALCULATOR=1
 
 echo "version: '3.9'
 name: tp1
@@ -46,7 +47,7 @@ echo "
       - CITIES=$CITIES
     volumes:
       - ./client/config.ini:/config.ini
-      - ./.data/archive:/data
+      - ./.data/dev:/data
     networks:
       - testing_net
     depends_on:
@@ -84,6 +85,7 @@ echo "
       - LOGGING_LEVEL=INFO
       - FIRST_YEAR_COMPARE=$FIRST_YEAR_COMPARE
       - SECOND_YEAR_COMPARE=$SECOND_YEAR_COMPARE
+      - CITY_TO_CALC_DISTANCE=$CITY_TO_CALC_DISTANCE
     networks:
       - testing_net
     depends_on:
@@ -162,6 +164,9 @@ echo "
       - N_WEATHER_FILTER_PER_CITY=$N_WEATHER_FILTER
       - N_STATIONS_JOINER_PER_CITY=$N_STATIONS_JOINER
       - NUMBER_AVERAGE_DURATION_PROCESSES=$NUMBER_AVERAGE_DURATION_PROCESSES
+      - N_DISTANCES_JOIN_PARSER=$N_DISTANCES_JOIN_PARSER
+      - DISTANCES_JOIN_PARSER_CITY=$CITY_TO_CALC_DISTANCE
+      - N_DISTANCE_CALCULATOR=$N_DISTANCE_CALCULATOR
     networks:
       - testing_net
     depends_on:
@@ -227,6 +232,44 @@ echo "
       rabbitmq:
         condition: service_healthy
 " >> docker-compose-dev.yaml
+
+
+for i in $(seq 0 $((N_DISTANCES_JOIN_PARSER - 1))); do
+echo "
+  distances-join-parser-$i:
+    container_name: distances-join-parser-$i
+    image: distances-join-parser:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - CITY=$CITY_TO_CALC_DISTANCE
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+" >> docker-compose-dev.yaml
+done
+
+for i in $(seq 0 $((N_DISTANCE_CALCULATOR - 1))); do
+echo "
+  distance-calculator-$i:
+    container_name: distance-calculator-$i
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+" >> docker-compose-dev.yaml
+done
+
+
 
 echo "
 networks:

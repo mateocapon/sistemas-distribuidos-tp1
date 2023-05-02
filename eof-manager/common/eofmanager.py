@@ -14,9 +14,18 @@ PACKET_DISTRIBUTOR_ACK = b'A'
 WEATHER_FILTER_ACK = b'B'
 STATIONS_JOINER_ACK = b'K'
 
+DISTANCES_JOIN_PARSER_EOF = b'X'
+DISTANCES_JOIN_PARSER_ACK = b'Z'
+
+DISTANCE_CALCULATOR_EOF = b'Z'
+DISTANCE_CALCULATOR_ACK = b'P'
+
+AVERAGE_DISTANCE_EOF = b'E'
+
 class EOFManager:
     def __init__(self, cities, n_packet_distributor, n_filter_per_city,
-                 n_station_joiner_per_city, n_duration_average):
+                 n_station_joiner_per_city, n_duration_average, n_distance_join_parser,
+                 join_parser_city, n_distance_calculator):
         self._connection = pika.BlockingConnection(
                                 pika.ConnectionParameters(host='rabbitmq'))
         self._channel = self._connection.channel()
@@ -38,7 +47,12 @@ class EOFManager:
 
         # trips per year to send eof
         self._channel.exchange_declare(exchange='stations-join-results', exchange_type='topic')
+        
+        # average distance to send eof
+        self._channel.exchange_declare(exchange='calculator-results', exchange_type='topic')
 
+        # distance calculator to send eof
+        self._channel.queue_declare(queue='distance-calculator', durable=True)
 
         self._n_packet_distributor = n_packet_distributor
         self._ack_packet_distributor = 0
@@ -55,6 +69,14 @@ class EOFManager:
 
         self._n_duration_average = n_duration_average
         self._cities = cities
+
+        self._n_distance_join_parser = n_distance_join_parser
+        self._ack_distances_join_parser = 0
+        self._join_parser_city = join_parser_city
+
+        self._n_distance_calculator = n_distance_calculator
+        self._ack_distance_calculator = 0
+        self._distance_calculator_finished = False
 
 
     def run(self):
@@ -85,7 +107,17 @@ class EOFManager:
             if self._ack_stations_joiner == self._n_stations_joiner:
                 self._stations_joiner_finished = True
                 self.__broadcast_trips_per_year_eof()
-        if self._weather_filter_finished and self._stations_joiner_finished:
+                self.__broadcast_distance_join_parser_eof()
+        elif type_message == DISTANCES_JOIN_PARSER_ACK[0]:
+            self._ack_distances_join_parser += 1
+            if self._ack_distances_join_parser == self._n_distance_join_parser:
+                self.__broadcast_distance_calculator_eof()
+        elif type_message == DISTANCE_CALCULATOR_ACK[0]:
+            self._ack_distance_calculator += 1
+            if self._ack_distance_calculator == self._n_distance_calculator:
+                self.__broadcast_average_distance_eof()
+
+        if self._weather_filter_finished and self._stations_joiner_finished and self._distance_calculator_finished:
             self._channel.stop_consuming()
 
 
@@ -97,6 +129,17 @@ class EOFManager:
                 exchange='', 
                 routing_key='task_queue', 
                 body=PACKET_DISTRIBUTOR_EOF, 
+                properties=pika.BasicProperties(
+                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+            ))
+
+    def __broadcast_distance_calculator_eof(self):
+        logging.info(f'action: broadcast_eof | to: distance_calculator')
+        for i in range(self._n_distance_calculator):
+            self._channel.basic_publish(
+                exchange='', 
+                routing_key='distance-calculator', 
+                body=DISTANCE_CALCULATOR_EOF, 
                 properties=pika.BasicProperties(
                     delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
             ))
@@ -126,6 +169,25 @@ class EOFManager:
         for city in self._cities:
             self._channel.basic_publish(exchange='stations-join-results', 
                           routing_key="trips_per_year."+city, body=TRIPS_PER_YEAR_EOF)
-        
+   
+
+    def __broadcast_distance_join_parser_eof(self):
+        logging.info(f'action: broadcast_eof | to: distance_join_parser')
+        for i in range(self._n_distance_join_parser):
+            self._channel.basic_publish(
+                exchange='stations-join-results', 
+                routing_key=self._join_parser_city+"parse-results-worker", 
+                body=DISTANCES_JOIN_PARSER_EOF, 
+                properties=pika.BasicProperties(
+                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+            ))
+
+    def __broadcast_average_distance_eof(self):
+        self._channel.basic_publish(exchange='stations-join-results',
+                                    routing_key="average_distance",
+                                    body=AVERAGE_DISTANCE_EOF)
+
+
+
     def __del__(self):
         self._connection.close()
