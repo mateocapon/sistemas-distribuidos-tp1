@@ -36,6 +36,7 @@ def initialize_config():
         config_params["chunk_size"] = int(os.getenv('CHUNK_SIZE', config["DEFAULT"]["CHUNK_SIZE"]))
         config_params["max_package_size"] = int(os.getenv('MAX_PACKAGE_SIZE', config["DEFAULT"]["MAX_PACKAGE_SIZE"]))
         config_params["n_queries"] = int(os.getenv('N_QUERIES', config["DEFAULT"]["N_QUERIES"]))
+        config_params["chunk_size_trips"] = int(os.getenv('CHUNK_SIZE_TRIPS', config["DEFAULT"]["CHUNK_SIZE_TRIPS"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting client".format(e))
     except ValueError as e:
@@ -54,6 +55,7 @@ def main():
     max_package_size = config_params["max_package_size"]
     chunk_size = config_params["chunk_size"]
     n_queries = config_params["n_queries"]
+    chunk_size_trips = config_params["chunk_size_trips"]
 
     initialize_log(logging_level)
 
@@ -66,7 +68,7 @@ def main():
 
     try:
         client = Client(server_ip, server_port, number_readers, cities.split(','), 
-                        chunk_size, max_package_size, n_queries)
+                        chunk_size, max_package_size, n_queries, chunk_size_trips)
         client.run()
     except:
        logging.error(f'action: run_client | result: fail | error: unknown')

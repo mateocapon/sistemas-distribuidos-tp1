@@ -9,10 +9,11 @@ from common.protocol import Protocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PE
 
 class Client:
     def __init__(self, server_ip, server_port, n_readers, cities,
-                 chunk_size, max_package_size, n_queries):
+                 chunk_size, max_package_size, n_queries, chunk_size_trips):
         self._server_addr = (server_ip, server_port)
         self._cities = cities
         self._chunk_size = chunk_size
+        self._chunk_size_trips = chunk_size_trips
         self._max_package_size = max_package_size
         self._n_queries = n_queries
         
@@ -31,7 +32,8 @@ class Client:
                                     args=(self._cities_queue, 
                                           self._server_addr,
                                           self._chunk_size,
-                                          self._max_package_size)) 
+                                          self._max_package_size,
+                                          self._chunk_size_trips)) 
                                     for i in range(self._n_readers)]
 
         self._workers_active = True

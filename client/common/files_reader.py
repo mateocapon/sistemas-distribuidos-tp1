@@ -12,11 +12,11 @@ from common.weather import INVALID_YEAR_ID
 INVALID_TRIP_STATION = "-1"
 
 
-def files_reader(cities_queue, server_addr, chunk_size, max_package_size):
+def files_reader(cities_queue, server_addr, chunk_size, max_package_size, chunk_size_trips):
     working = True
     try:
         while working:
-            reader = FilesReader(server_addr, chunk_size, max_package_size)
+            reader = FilesReader(server_addr, chunk_size, max_package_size, chunk_size_trips)
             city = cities_queue.get()
             working = reader.process_files(city)
     except Exception as e:
@@ -25,8 +25,9 @@ def files_reader(cities_queue, server_addr, chunk_size, max_package_size):
         logging.error(f'action: files_reader | result: fail | error: unknown')
 
 class FilesReader:
-    def __init__(self, server_addr, chunk_size, max_package_size):
+    def __init__(self, server_addr, chunk_size, max_package_size, chunk_size_trips):
         self._chunk_size = chunk_size
+        self._chunk_size_trips = chunk_size_trips
         self._server_addr = server_addr
         self._skt = socket.socket()
         self._skt.connect(server_addr)
@@ -75,7 +76,7 @@ class FilesReader:
         trips = []
         for trip in self.__load_trips(file_path):
             trips.append(trip)
-            if len(trips) == self._chunk_size:
+            if len(trips) == self._chunk_size_trips:
                 self._protocol.send_trips_chunk(self._skt, city, trips)
                 trips = []
         self._protocol.send_last_trips_chunk(self._skt, city, trips)
