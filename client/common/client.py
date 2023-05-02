@@ -5,7 +5,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 from common.files_reader import files_reader
 import time
-from common.protocol import Protocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PER_YEAR
+from common.protocol import Protocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PER_YEAR, RESULTS_AVERAGE_DISTANCE
 
 class Client:
     def __init__(self, server_ip, server_port, n_readers, cities,
@@ -79,8 +79,11 @@ class Client:
                 n_stations = sum([len(city_data[1]) for city_data in result])
                 logging.info(f"Cantidad de estaciones: {n_stations}")
                 logging.info(f"{result}")
-            else:
-                logging.info(f"res: {result}")
+            elif type_result == RESULTS_AVERAGE_DISTANCE[0]:
+                logging.info("Los nombres de estaciones de Montreal para la que el promedio de los ciclistas recorren más"
+                                "de 6km en llegar a ellas.")
+                logging.info(f"Cantidad de estaciones: {len(result)}")
+                logging.info(f"Resultados: {result}")
 
 
     def __stop_client(self, *args):

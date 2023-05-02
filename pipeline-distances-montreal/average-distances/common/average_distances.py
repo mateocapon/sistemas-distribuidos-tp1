@@ -6,8 +6,10 @@ AVERAGE_DISTANCE_RESULTS = b'D'
 SCALE_FLOAT = 100
 INT32_SIZE = 4
 UINT16_SIZE = 2
-
+UINT32_SIZE = 4
 AVERAGE_POS = 0
+N_TRIPS_POS = 1
+IS_BIGGER_POS = 2
 
 class AverageDistances:
     def __init__(self, minumum_distance_km):
@@ -60,10 +62,10 @@ class AverageDistances:
             old_n_registries = old_values[N_TRIPS_POS]
             new_n_registries = old_n_registries + 1
             new_average = (old_average *  old_n_registries + distance) / new_n_registries
-            bigger_distance = self._minumum_distance_km >= new_average
+            bigger_distance = self._minumum_distance_km <= new_average
             self._average_distances[station] = (new_average, new_n_registries, bigger_distance)
         else:
-            bigger_distance = self._minumum_distance_km >= distance
+            bigger_distance = self._minumum_distance_km <= distance
             self._average_distances[station] = (distance, 1, bigger_distance)
 
 
@@ -73,7 +75,7 @@ class AverageDistances:
         n_results = 0
         for station, value in self._average_distances.items():
             if value[IS_BIGGER_POS]:
-                results += self.__encode_string(station.decode('utf-8'))
+                results += self.__encode_string(station)
                 results += self.__encode_float(value[AVERAGE_POS])
                 n_results += 1
         len_results = self.__encode_uint16(n_results)
@@ -84,6 +86,17 @@ class AverageDistances:
 
     def __decode_float(self, to_decode):
         return float(int.from_bytes(to_decode, "big")) / SCALE_FLOAT
+
+    def __encode_string(self, to_encode):
+        encoded = to_encode
+        size = len(encoded).to_bytes(UINT16_SIZE, "big")
+        return size + encoded
+
+    def __encode_float(self, to_encode):
+        return int(to_encode * SCALE_FLOAT).to_bytes(UINT32_SIZE, "big")
+    
+    def __encode_uint16(self, to_encode):
+        return to_encode.to_bytes(UINT16_SIZE, "big")
 
     def __decode_string(self, to_decode):
         size_string = int.from_bytes(to_decode[:UINT16_SIZE], byteorder='big')

@@ -25,6 +25,7 @@ GET_RESULTS_MESSAGE = 'R'
 
 RESULTS_AVERAGE_DURATION = b'A'
 RESULTS_TRIPS_PER_YEAR = b'Y'
+RESULTS_AVERAGE_DISTANCE = b'D'
 
 
 TYPE_POS = 0
@@ -135,12 +136,14 @@ class Protocol:
         res = self.__recvall(skt, len_results)
         type_result = res[TYPE_POS]
         if type_result == RESULTS_AVERAGE_DURATION[0]:
-            res = self.__receive_average_durations(skt, res[TYPE_POS+TYPE_LEN:])
+            res = self.__receive_average_durations(res[TYPE_POS+TYPE_LEN:])
         elif type_result == RESULTS_TRIPS_PER_YEAR[0]:
-            res = self.__receive_stations_double_trips(skt, res[TYPE_POS+TYPE_LEN:])
+            res = self.__receive_stations_double_trips(res[TYPE_POS+TYPE_LEN:])
+        elif type_result == RESULTS_AVERAGE_DISTANCE[0]:
+            res = self.__receive_average_distances(res[TYPE_POS+TYPE_LEN:])
         return (type_result, res)
 
-    def __receive_average_durations(self, skt, all_results):
+    def __receive_average_durations(self, all_results):
         res = []
         for i in range(0, len(all_results), AVERAGE_DURATION_RESPONSE_LEN):
             date = all_results[i:i+DATE_WEATHER_LEN].decode("utf-8")
@@ -148,7 +151,20 @@ class Protocol:
             res.append((date, average_duration))
         return res
     
-    def __receive_stations_double_trips(self, skt, all_results):
+    def __receive_average_distances(self, all_results):
+        res = []
+        next_pos_to_process = 0
+        n_results = self.__read_uint16(all_results[next_pos_to_process:next_pos_to_process+UINT16_SIZE])
+        next_pos_to_process = next_pos_to_process + UINT16_SIZE
+        for i in range(n_results):
+            station = self.__decode_string(all_results[next_pos_to_process:])
+            next_pos_to_process = next_pos_to_process + UINT16_SIZE + len(station)
+            average_distance = self.__decode_float(all_results[next_pos_to_process:next_pos_to_process+INT32_SIZE])
+            next_pos_to_process = next_pos_to_process + INT32_SIZE
+            res.append((station.decode("utf-8"), average_distance))
+        return res
+    
+    def __receive_stations_double_trips(self, all_results):
         res = []
         len_results = len(all_results)
         next_pos_to_process = 0

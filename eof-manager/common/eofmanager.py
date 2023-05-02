@@ -191,7 +191,5 @@ class EOFManager:
                                     routing_key="average_distance",
                                     body=AVERAGE_DISTANCE_EOF)
 
-
-
     def __del__(self):
         self._connection.close()
