@@ -117,7 +117,6 @@ class StationsJoiner:
             len_latitude = self.__encode_uint16(len(latitude))
             longitude = value[LONGITUDE_POS]
             len_longitude = self.__encode_uint16(len(longitude))
-            logging.info(f"Mando {latitude},{longitude}")
             return len_name+name+len_latitude+latitude+len_longitude+longitude
 
 

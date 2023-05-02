@@ -11,7 +11,6 @@ UINT32_SIZE = 4
 
 DISTANCE_CALCULATOR_EOF = b'Z'
 DISTANCE_CALCULATOR_ACK = b'P'
-DISTANCE_CALCULATOR_RESULTS = b'R'
 
 class DistanceCalculator:
     def __init__(self):
@@ -63,18 +62,16 @@ class DistanceCalculator:
                               self.__encode_uint16(len(other_irrelevant_trip_data))+\
                               other_irrelevant_trip_data
 
-        self._channel.basic_publish(exchange='stations-join-results',
+        self._channel.basic_publish(exchange='calculator-results',
                                     routing_key=send_response_to.decode("utf-8"),
-                                    body=DISTANCE_CALCULATOR_RESULTS+result)
+                                    body=result)
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
     def __calculate_distance(self, init_latitude, init_longitude, end_latitude, end_longitude):
         init = (float(init_latitude.decode("utf-8")), float(init_longitude.decode("utf-8")))
         end = (float(end_latitude.decode("utf-8")), float(end_longitude.decode("utf-8")))
-        dist = haversine(init, end)
-        logging.info(f"La distancia es {dist} desde {init} hasta {end}")
-        return dist
+        return haversine(init, end)
 
 
     def __decode_string(self, to_decode):

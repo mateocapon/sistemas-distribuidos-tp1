@@ -173,7 +173,6 @@ class PacketDistributor:
                                  s[END_CODE_POS: END_CODE_POS + CODE_LEN]
                                  for s in divided_trips]
         filtered_codes_year = b''.join(filtered_codes_year)
-        logging.info(f"envio a query distances")
         self._channel.basic_publish(exchange='stations_joiner', 
                                     routing_key=city, body=header+filtered_header+filtered_codes_year)
 

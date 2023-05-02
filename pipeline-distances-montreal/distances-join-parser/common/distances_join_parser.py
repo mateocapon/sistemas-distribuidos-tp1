@@ -67,7 +67,6 @@ class DistancesJoinParser:
                                         self.__encode_string(end_latitude) +\
                                         self.__encode_string(end_longitude) +\
                                         self.__encode_string(end_station_name)
-        logging.info(f"Enviando {msg_to_distance_calculator}")
         self._channel.basic_publish(
             exchange='',
             routing_key='distance-calculator',

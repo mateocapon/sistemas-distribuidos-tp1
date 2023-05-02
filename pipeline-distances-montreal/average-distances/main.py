@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.trips_per_year import TripsPerYear
+from common.average_distances import AverageDistances
 import logging
 import os
 
@@ -27,9 +27,7 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
-        config_params["city"] = os.getenv('CITY', config["DEFAULT"]["CITY"])
-        config_params["first_year_compare"] = int(os.getenv('FIRST_YEAR_COMPARE', config["DEFAULT"]["FIRST_YEAR_COMPARE"]))
-        config_params["second_year_compare"] = int(os.getenv('SECOND_YEAR_COMPARE', config["DEFAULT"]["SECOND_YEAR_COMPARE"]))
+        config_params["minumum_distance_km"] = float(os.getenv('MINIMUM_DISTANCE_KM', config["DEFAULT"]["MINIMUM_DISTANCE_KM"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -41,20 +39,18 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-    city = config_params["city"]
-    first_year_compare = config_params["first_year_compare"]
-    second_year_compare = config_params["second_year_compare"]
+    minumum_distance_km = config_params["minumum_distance_km"]
     
     initialize_log(logging_level)
 
     # Log config parameters at the beginning of the program to verify the configuration
     # of the component
     logging.debug(f"action: config | result: success | logging_level: {logging_level} |"
-                  f"city: {city} ")
+                  f"minumum_distance_km: {minumum_distance_km} ")
 
     try:
-        trips_per_year = TripsPerYear(city, first_year_compare, second_year_compare)
-        trips_per_year.run()
+        average_distances = AverageDistances(minumum_distance_km)
+        average_distances.run()
     except OSError as e:
         logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
 

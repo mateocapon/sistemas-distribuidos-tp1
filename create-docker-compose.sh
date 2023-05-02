@@ -16,6 +16,7 @@ NUMBER_AVERAGE_DURATION_PROCESSES=2
 N_DISTANCES_JOIN_PARSER=1
 CITY_TO_CALC_DISTANCE="montreal"
 N_DISTANCE_CALCULATOR=1
+MINIMUM_DISTANCE_KM=6
 
 echo "version: '3.9'
 name: tp1
@@ -269,7 +270,21 @@ echo "
 " >> docker-compose-dev.yaml
 done
 
-
+echo "
+  average-distances:
+    container_name: average-distances
+    image: average-distances:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - MINIMUM_DISTANCE_KM=$MINIMUM_DISTANCE_KM
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+" >> docker-compose-dev.yaml
 
 echo "
 networks:

@@ -109,12 +109,15 @@ class EOFManager:
                 self.__broadcast_trips_per_year_eof()
                 self.__broadcast_distance_join_parser_eof()
         elif type_message == DISTANCES_JOIN_PARSER_ACK[0]:
+            logging.info(f'action: eof_ack | result: received | from: distances_join_parser')
             self._ack_distances_join_parser += 1
             if self._ack_distances_join_parser == self._n_distance_join_parser:
                 self.__broadcast_distance_calculator_eof()
         elif type_message == DISTANCE_CALCULATOR_ACK[0]:
+            logging.info(f'action: eof_ack | result: received | from: distance_calculator')
             self._ack_distance_calculator += 1
             if self._ack_distance_calculator == self._n_distance_calculator:
+                self._distance_calculator_finished = True
                 self.__broadcast_average_distance_eof()
 
         if self._weather_filter_finished and self._stations_joiner_finished and self._distance_calculator_finished:
@@ -176,14 +179,15 @@ class EOFManager:
         for i in range(self._n_distance_join_parser):
             self._channel.basic_publish(
                 exchange='stations-join-results', 
-                routing_key=self._join_parser_city+"parse-results-worker", 
+                routing_key="distances_join_parser."+self._join_parser_city, 
                 body=DISTANCES_JOIN_PARSER_EOF, 
                 properties=pika.BasicProperties(
                     delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
             ))
 
     def __broadcast_average_distance_eof(self):
-        self._channel.basic_publish(exchange='stations-join-results',
+        logging.info(f'action: broadcast_eof | to: average_distances')
+        self._channel.basic_publish(exchange='calculator-results',
                                     routing_key="average_distance",
                                     body=AVERAGE_DISTANCE_EOF)
 

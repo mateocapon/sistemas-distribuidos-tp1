@@ -261,6 +261,7 @@ services:
       - NUMBER_AVERAGE_DURATION_PROCESSES=2
       - N_DISTANCES_JOIN_PARSER=1
       - DISTANCES_JOIN_PARSER_CITY=montreal
+      - N_DISTANCE_CALCULATOR=1
     networks:
       - testing_net
     depends_on:
@@ -401,6 +402,21 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  average-distances:
+    container_name: average-distances
+    image: average-distances:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+      - MINIMUM_DISTANCE_KM=6
     networks:
       - testing_net
     depends_on:
