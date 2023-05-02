@@ -14,15 +14,15 @@ INVALID_TRIP_STATION = "-1"
 
 def files_reader(cities_queue, server_addr, chunk_size, max_package_size):
     working = True
-    # try:
-    while working:
-        reader = FilesReader(server_addr, chunk_size, max_package_size)
-        city = cities_queue.get()
-        working = reader.process_files(city)
-    # except Exception as e:
-    #     logging.error(f'action: files_reader | result: fail | error: {str(e)}')
-    # except:
-    #     logging.error(f'action: files_reader | result: fail | error: unknown')
+    try:
+        while working:
+            reader = FilesReader(server_addr, chunk_size, max_package_size)
+            city = cities_queue.get()
+            working = reader.process_files(city)
+    except Exception as e:
+        logging.error(f'action: files_reader | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: files_reader | result: fail | error: unknown')
 
 class FilesReader:
     def __init__(self, server_addr, chunk_size, max_package_size):
@@ -38,9 +38,13 @@ class FilesReader:
         logging.debug("en reader")
         if not city:
             return False
-        self.__process_stations(city)
-        self.__process_weather(city)
-        self.__process_trips(city)
+        try:
+            self.__process_stations(city)
+            self.__process_weather(city)
+            self.__process_trips(city)
+        except OSError as e:
+            if self._skt:
+                self._skt.close()
         end = time.time()
         logging.info(f"action: process_files | city: {city} | time: {end - start}")
 

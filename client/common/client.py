@@ -34,7 +34,8 @@ class Client:
                                           self._max_package_size)) 
                                     for i in range(self._n_readers)]
 
-        self.client_active = True
+        self._workers_active = True
+        self._client_active = True
         self._skt = None
         signal.signal(signal.SIGTERM, self.__stop_client)
 
@@ -45,9 +46,14 @@ class Client:
 
         for worker in self._workers:
             worker.join()
-
-        self.__wait_for_results()
-
+        self._workers_active = False
+        if not self._client_active:
+            return
+        try:
+            self.__wait_for_results()
+        except OSError as e:
+            if self._skt:
+                self._skt.close()
 
     def __wait_for_results(self):
         n_results_received = 0
@@ -63,7 +69,9 @@ class Client:
                 polling_sleep_time = polling_sleep_time * 2
             else:
                 self.__log_results(results)
+                polling_sleep_time = 1
             self._skt.close()
+            self._skt = None
 
 
     def __log_results(self, results):
@@ -88,4 +96,9 @@ class Client:
 
     def __stop_client(self, *args):
         logging.debug("Stop client")
-        self.client_active = False
+        self._client_active = False
+        if self._workers_active:
+            for worker in self._workers:
+                worker.terminate()
+        if self._skt:
+            self._skt.shutdown(socket.SHUT_RDWR)

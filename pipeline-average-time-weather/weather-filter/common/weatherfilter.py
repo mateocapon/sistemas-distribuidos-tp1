@@ -89,6 +89,7 @@ class WeatherFilter:
         if self._chunks_received - 1 == self._last_chunk_number:
             logging.info("Llego el ultimo")
             self._channel.stop_consuming()
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
     def __trips_callback(self, ch, method, properties, body):

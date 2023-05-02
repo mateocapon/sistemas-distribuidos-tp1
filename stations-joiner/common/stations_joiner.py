@@ -102,7 +102,6 @@ class StationsJoiner:
     def __get_joined(self, code, year_id, type_join):
         key = str(code)+"-"+str(year_id)
         if key not in self._stations:
-            logging.info(f"La key {key} no se encuentra en el diccionario")
             return None
         value = self._stations[key]
         if type_join == TYPE_JOIN_ONLY_NAME[0]:
@@ -130,6 +129,7 @@ class StationsJoiner:
         if self._chunks_received - 1 == self._last_chunk_number:
             logging.info("Llego el ultimo station")
             self._channel.stop_consuming()
+        ch.basic_ack(delivery_tag=method.delivery_tag)
     
     
     def __process_stations(self, stations_data):

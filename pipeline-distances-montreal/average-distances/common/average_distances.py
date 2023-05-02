@@ -45,7 +45,6 @@ class AverageDistances:
             self.__send_results()
             return
         current_pos = 1
-        logging.info(f"Voy a procesar: {body}")
         max_pos = len(body)
         while current_pos < max_pos:
             distance = self.__decode_float(body[current_pos: current_pos+INT32_SIZE])
