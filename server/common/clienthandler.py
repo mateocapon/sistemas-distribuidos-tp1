@@ -5,13 +5,17 @@ import signal
 from common.protocol import Protocol
 from common.protocol import CHUNK_STATIONS, CHUNK_WEATHER, CHUNK_TRIPS
 
-def handle_client_connection(clients_queue):
+def handle_client_connection(clients_queue, workers_results):
     try:
         client_handler = ClientHandler(clients_queue)
-        client_handler.run()
+        client_handler.run(workers_results)
     except Exception as e:
+        error_encountered = True
+        workers_results.put(error_encountered)
         logging.error(f'action: client_handler | result: fail | error: {str(e)}')
     except:
+        error_encountered = True
+        workers_results.put(error_encountered)
         logging.error(f'action: client_handler | result: fail | error: unknown')
 
 
@@ -23,7 +27,7 @@ class ClientHandler:
         self._client_sock = None
         self._server_working = True
 
-    def run(self):
+    def run(self, workers_results):
         while self._server_working:
             try:
                 self._client_sock, id_if_stop = self._clients_queue.get()
@@ -35,6 +39,8 @@ class ClientHandler:
                 self.__receive_chunks(CHUNK_WEATHER[0])
                 self.__receive_chunks(CHUNK_TRIPS[0])
             except OSError as e:
+                error_encountered = True
+                workers_results.put(error_encountered)
                 logging.error(f'action: receive_message | result: fail | error: {e}')
             finally:
                 if self._client_sock:

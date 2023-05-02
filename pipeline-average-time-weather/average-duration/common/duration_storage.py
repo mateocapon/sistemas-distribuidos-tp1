@@ -61,7 +61,6 @@ class DurationStorage:
 
     
     def __send_results(self):
-        logging.info(f"Los results son {self._average_durations}")
         results = b''
         for key, value in self._average_durations.items():
             results += key

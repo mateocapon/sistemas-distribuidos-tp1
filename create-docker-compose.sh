@@ -52,7 +52,7 @@ echo "
       - CITIES=$CITIES
     volumes:
       - ./client/config.ini:/config.ini
-      - ./.data/dev:/data
+      - ./.data/archive:/data
     networks:
       - testing_net
     depends_on:

@@ -69,7 +69,6 @@ class AverageDistances:
 
 
     def __send_results(self):
-        logging.info(f"Los results son {self._average_distances}")
         results = b''
         n_results = 0
         for station, value in self._average_distances.items():

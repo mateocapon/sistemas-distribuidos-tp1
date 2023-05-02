@@ -76,7 +76,6 @@ class TripsPerYear:
 
 
     def __send_results(self):
-        logging.info(f"Los results son {self._stations_double_trips}")
         city = self.__encode_string(self._city)
         results = b''
         n_results = 0

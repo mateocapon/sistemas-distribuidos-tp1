@@ -16,16 +16,27 @@ class Server:
         self._n_workers = min(n_workers, n_cities)
         self._n_cities = n_cities
         self._n_queries = n_queries
+        self._workers_results_error = mp.Queue()
         self._clients_accepted_queue = mp.Queue()
         self._workers = [mp.Process(target=handle_client_connection, 
-                                    args=(self._clients_accepted_queue,))
+                                    args=(self._clients_accepted_queue,self._workers_results_error))
                         for i in range(self._n_workers)]
         self._workers_active = True           
         signal.signal(signal.SIGTERM, self.__stop_accepting)
+        self._results_handler = None
+        
 
     def run(self):
         self.__receive_data()
         self._workers_active = False
+        try:
+            # if get is possible, there is an error.
+            self._workers_results_error.get_nowait()
+            self._server_socket.close()
+            return
+        except queue.Empty:
+            logging.info(f"Al workers finished ok")
+
         try:
             if self._server_active:
                 self.__send_results()
@@ -37,9 +48,9 @@ class Server:
 
     def __send_results(self):
         results_queue = mp.Queue()
-        resultshandler = mp.Process(target=wait_for_results, args=(results_queue, self._n_queries,))
-        resultshandler.daemon = True
-        resultshandler.start()
+        self._results_handler = mp.Process(target=wait_for_results, args=(results_queue, self._n_queries,))
+        self._results_handler.daemon = True
+        self._results_handler.start()
 
         try:
             results_received = 0 
@@ -61,8 +72,7 @@ class Server:
         except:
             logging.info("action: wait_results | result: fail")
         finally:
-            resultshandler.terminate()
-            resultshandler.join()
+            self._results_handler.join()
 
 
     def __receive_data(self):
@@ -114,6 +124,8 @@ class Server:
         if self._workers_active:
             for worker in self._workers:
                 worker.terminate()
+        if self._results_handler:
+            self._results_handler.terminate()
         try:
             self._server_socket.shutdown(socket.SHUT_WR)
             logging.info('action: stop_server | result: success')
