@@ -2,6 +2,7 @@ import pika
 import logging
 import time
 import datetime
+import hashlib
 
 NUMBER_CHUNK_POS = 0
 NUMBER_CHUNK_SIZE = 4
@@ -103,7 +104,7 @@ class WeatherFilter:
             trip = trips_data[i:i+TRIP_DATA_LEN]
             trip_date = datetime.date.fromisoformat(trip[:DATE_TRIP_LEN].decode('utf-8'))
             if trip_date in self._weather_registries:
-                queue_to_send = hash(trip_date) % self._n_average_duration_processes
+                queue_to_send = self.__hash_date(trip[:DATE_TRIP_LEN]) % self._n_average_duration_processes
                 data_for_average_duration[queue_to_send] += trip
 
         for queue_to_send, data in enumerate(data_for_average_duration):
@@ -127,6 +128,9 @@ class WeatherFilter:
     def __prectot_condition(self, item):
         return self.__decode_int32(item[PRECTOT_POS]) > self._prectot_cond
 
+    def __hash_date(self, trip_date):
+        sha256 = hashlib.sha256(trip_date)
+        return int.from_bytes(sha256.digest()[:4], byteorder='big')
 
     def __to_datetime(self, item):
         date = item[DATE_POS].decode('utf-8')

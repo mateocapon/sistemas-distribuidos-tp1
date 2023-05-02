@@ -52,7 +52,7 @@ echo "
       - CITIES=$CITIES
     volumes:
       - ./client/config.ini:/config.ini
-      - ./.data/archive:/data
+      - ./.data/dev:/data
     networks:
       - testing_net
     depends_on:
@@ -60,7 +60,7 @@ echo "
     deploy:
       resources:
         limits:
-          cpus: '0.50'
+          cpus: '0.70'
 " >> docker-compose-dev.yaml
 
 

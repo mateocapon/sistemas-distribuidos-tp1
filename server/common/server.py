@@ -20,12 +20,19 @@ class Server:
         self._workers = [mp.Process(target=handle_client_connection, 
                                     args=(self._clients_accepted_queue,))
                         for i in range(self._n_workers)]
+        self._workers_active = True           
         signal.signal(signal.SIGTERM, self.__stop_accepting)
 
     def run(self):
         self.__receive_data()
-        self.__send_results()
-        self._server_socket.close()
+        self._workers_active = False
+        try:
+            if self._server_active:
+                self.__send_results()
+        except OSError as e:
+            logging.info(f"Se interrumpe el server")
+        finally:
+            self._server_socket.close()
 
 
     def __send_results(self):
@@ -34,22 +41,29 @@ class Server:
         resultshandler.daemon = True
         resultshandler.start()
 
-        results_received = 0 
-        protocol = Protocol()
-        while results_received < self._n_queries:
-            client_sock = self.__accept_new_connection()
-            results = []
-            while True:
-                try:
-                    results.append(results_queue.get_nowait())
-                    logging.info(f"receibi un resultado")
-                except queue.Empty:
-                    results_received += len(results)
-                    protocol.send_results(client_sock, results)
-                    break
-            client_sock.close()
-        resultshandler.join()
- 
+        try:
+            results_received = 0 
+            protocol = Protocol()
+            while results_received < self._n_queries:
+                client_sock = self.__accept_new_connection()
+                if not client_sock:
+                    raise OSError("Unable to accept connection")
+                results = []
+                while True:
+                    try:
+                        results.append(results_queue.get_nowait())
+                        logging.info(f"receibi un resultado")
+                    except queue.Empty:
+                        results_received += len(results)
+                        protocol.send_results(client_sock, results)
+                        break
+                client_sock.close()
+        except:
+            logging.info("action: wait_results | result: fail")
+        finally:
+            resultshandler.terminate()
+            resultshandler.join()
+
 
     def __receive_data(self):
         for worker in self._workers:
@@ -97,6 +111,9 @@ class Server:
         """
         logging.info('action: stop_server | result: in_progress')
         self._server_active = False
+        if self._workers_active:
+            for worker in self._workers:
+                worker.terminate()
         try:
             self._server_socket.shutdown(socket.SHUT_WR)
             logging.info('action: stop_server | result: success')

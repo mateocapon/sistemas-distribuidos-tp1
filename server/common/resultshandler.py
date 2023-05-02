@@ -1,14 +1,17 @@
 import pika
 import logging
 from common.protocol import Protocol
+import signal
 
 SERVER_ACK = b'S'
 
 def wait_for_results(queue_to_send_results, n_queries):
-    resultshandler = ResultsHandler(queue_to_send_results, n_queries)
-    resultshandler.send_eof()
-    resultshandler.wait_for_results()
-
+    try:   
+        resultshandler = ResultsHandler(queue_to_send_results, n_queries)
+        resultshandler.send_eof()
+        resultshandler.wait_for_results()
+    except:
+        logging.info('action: wait_results | result: fail')
 
 class ResultsHandler:
     def __init__(self, queue_to_send_results, n_queries):
@@ -20,6 +23,8 @@ class ResultsHandler:
         self._queue_to_send_results = queue_to_send_results
         self._n_queries = n_queries
         self._results_received = 0
+        self._active = True
+        signal.signal(signal.SIGTERM, self.__stop_consuming)
 
 
     def send_eof(self):
@@ -36,6 +41,12 @@ class ResultsHandler:
         self._results_received += 1
         self._queue_to_send_results.put(body)
         if self._results_received == self._n_queries:
+            self._active = False
+            self._channel.stop_consuming()
+
+
+    def __stop_consuming(self, *args):
+        if self._active:
             self._channel.stop_consuming()
 
     def __del__(self):
