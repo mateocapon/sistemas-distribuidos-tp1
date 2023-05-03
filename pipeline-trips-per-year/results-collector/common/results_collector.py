@@ -1,5 +1,6 @@
 import pika
 import logging
+import signal
 
 RESULTS_TRIPS_PER_YEAR = b'Y'
 
@@ -16,6 +17,9 @@ class ResultsCollector:
         # results to produce result to client
         self._channel.queue_declare(queue='final-results', durable=True)
         self._results = b''
+        self._connection_open = True
+        signal.signal(signal.SIGTERM, self.__stop_connection)
+
 
     def run(self):
         self._channel.basic_consume(queue='results-collector-trips-per-year', on_message_callback=self.__callback, auto_ack=True)
@@ -35,4 +39,9 @@ class ResultsCollector:
             self._channel.stop_consuming()
      
     def __del__(self):
+        if self._connection_open:
+            self._connection.close()
+
+    def __stop_connection(self, *args):
+        self._connection_open = False
         self._connection.close()

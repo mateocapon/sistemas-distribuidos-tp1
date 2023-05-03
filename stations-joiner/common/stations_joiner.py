@@ -1,5 +1,7 @@
 import pika
 import logging
+import signal
+
 
 TYPE_POS = 4
 LAST_CHUNK_STATIONS = b'A'
@@ -48,6 +50,8 @@ class StationsJoiner:
         self._chunks_received = 0
         self._last_chunk_number = -1
         self._stations = {}
+        self._connection_open = True
+        signal.signal(signal.SIGTERM, self.__stop_connection)
 
 
     def run(self):
@@ -175,4 +179,9 @@ class StationsJoiner:
         return decoded
 
     def __del__(self):
+        if self._connection_open:
+            self._connection.close()
+
+    def __stop_connection(self, *args):
+        self._connection_open = False
         self._connection.close()

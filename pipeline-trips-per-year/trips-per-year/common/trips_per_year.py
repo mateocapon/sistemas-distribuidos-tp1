@@ -1,5 +1,6 @@
 import pika
 import logging
+import signal
 
 FIRST_YEAR_COMPARE_POS = 0
 SECOND_YEAR_COMPARE_POS = 1
@@ -35,6 +36,8 @@ class TripsPerYear:
         self._channel.queue_declare(queue='results-collector-trips-per-year', durable=True)
 
         self._stations_double_trips = {}
+        self._connection_open = True
+        signal.signal(signal.SIGTERM, self.__stop_connection)
 
 
     def run(self):
@@ -115,4 +118,10 @@ class TripsPerYear:
         return decoded
 
     def __del__(self):
+        if self._connection_open:
+            self._connection.close()
+
+    def __stop_connection(self, *args):
+        self._connection_open = False
         self._connection.close()
+
