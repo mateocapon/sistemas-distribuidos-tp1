@@ -31,6 +31,7 @@ def initialize_config():
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
         config_params["number_processes_pool"] = int(os.getenv('NUMBER_PROCESSES_POOL', config["DEFAULT"]["NUMBER_PROCESSES_POOL"]))
         config_params["n_cities"] = int(os.getenv('N_CITIES', config["DEFAULT"]["N_CITIES"]))
+        config_params["max_package_size"] = int(os.getenv('MAX_PACKAGE_SIZE', config["DEFAULT"]["MAX_PACKAGE_SIZE"]))
         config_params["n_queries"] = int(os.getenv('N_QUERIES', config["DEFAULT"]["N_QUERIES"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting server".format(e))
@@ -48,6 +49,7 @@ def main():
     number_processes_pool = config_params["number_processes_pool"]
     n_cities = config_params["n_cities"]
     n_queries = config_params["n_queries"]
+    max_package_size = config_params["max_package_size"]
 
     initialize_log(logging_level)
 
@@ -58,7 +60,7 @@ def main():
 
     # Initialize server and start server loop
     try:
-        server = Server(port, listen_backlog, number_processes_pool, n_cities, n_queries)
+        server = Server(port, listen_backlog, number_processes_pool, n_cities, n_queries, max_package_size)
         server.run()
     except OSError as e:
         logging.error(f'action: initialize_server | result: fail | error: {e}')

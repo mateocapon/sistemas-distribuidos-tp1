@@ -18,15 +18,13 @@ RESULTS_AVERAGE_DURATION = b'A'
 RESULTS_TRIPS_PER_YEAR = b'Y'
 RESULTS_AVERAGE_DISTANCE = b'D'
 
-
 TYPE_POS = 0
 TYPE_LEN = 1
 AVERAGE_DURATION_RESPONSE_LEN = DATE_WEATHER_LEN + INT32_SIZE
 
 class ClientProtocol(Protocol):
     def __init__(self, max_package_size):
-        super().__init__()
-        self._max_package_size = max_package_size
+        super().__init__(max_package_size)
 
     def send_stations_chunk(self, socket, city, stations):
         self.__send_stations_chunk(socket, city, stations, CHUNK_STATIONS)

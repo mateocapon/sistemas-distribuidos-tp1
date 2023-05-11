@@ -2,12 +2,14 @@ import socket
 import logging
 import queue
 import signal
-from common.protocol import Protocol
-from common.protocol import CHUNK_STATIONS, CHUNK_WEATHER, CHUNK_TRIPS
+from common.serverprotocol import ServerProtocol
+from common.serverprotocol import CHUNK_STATIONS, CHUNK_WEATHER, CHUNK_TRIPS
+from common.serverserializer import ServerSerializer
+from common.servermiddleware import ServerMiddleware
 
-def handle_client_connection(clients_queue, workers_results):
+def handle_client_connection(clients_queue, max_package_size, workers_results):
     try:
-        client_handler = ClientHandler(clients_queue)
+        client_handler = ClientHandler(clients_queue, max_package_size)
         client_handler.run(workers_results)
     except Exception as e:
         error_encountered = True
@@ -20,12 +22,14 @@ def handle_client_connection(clients_queue, workers_results):
 
 
 class ClientHandler:
-    def __init__(self, clients_queue):
+    def __init__(self, clients_queue, max_package_size):
         self._clients_queue = clients_queue
-        self._protocol = Protocol()
+        self._protocol = ServerProtocol(max_package_size)
         signal.signal(signal.SIGTERM, self.__stop_handler)
         self._client_sock = None
         self._server_working = True
+        self._middleware = ServerMiddleware()
+        self._serializer = ServerSerializer()
 
     def run(self, workers_results):
         while self._server_working:
@@ -50,7 +54,9 @@ class ClientHandler:
         chunk_id = 0
         status = type_chunk
         while status == type_chunk:
-            status = self._protocol.forward_chunk(self._client_sock, chunk_id)
+            status, chunk = self._protocol.receive_chunk(self._client_sock)
+            data = self._serializer.serialize_chunk(chunk, chunk_id)
+            self._middleware.send_chunk(data)
             chunk_id += 1
         logging.info(f"Recibo el ultimo del chunk, {status}")
 

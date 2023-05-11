@@ -1,7 +1,8 @@
 from common.serializer import Serializer, UINT16_SIZE
 
 class Protocol:
-    def __init__(self):
+    def __init__(self, max_package_size):
+        self._max_package_size = max_package_size
         self.serializer = Serializer()
 
     def sendall(self, socket, msg):

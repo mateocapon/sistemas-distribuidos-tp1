@@ -1,53 +1,39 @@
 import pika
 import logging
-from common.protocol import Protocol
+from common.servermiddleware import ServerMiddleware
 import signal
 
-SERVER_ACK = b'S'
 
 def wait_for_results(queue_to_send_results, n_queries):
     try:   
         resultshandler = ResultsHandler(queue_to_send_results, n_queries)
         resultshandler.send_eof()
         resultshandler.wait_for_results()
+    except Exception as e:
+        logging.info(f'action: wait_results | result: fail | error: {str(e)}')
     except:
         logging.info('action: wait_results | result: fail')
 
 class ResultsHandler:
     def __init__(self, queue_to_send_results, n_queries):
-        self._connection = pika.BlockingConnection(
-                                pika.ConnectionParameters(host='rabbitmq'))
-        self._channel = self._connection.channel()
-        self._channel.queue_declare(queue='eof-manager', durable=True)
-        self._channel.queue_declare(queue='final-results', durable=True)
+        self._middleware = ServerMiddleware()
         self._queue_to_send_results = queue_to_send_results
         self._n_queries = n_queries
         self._results_received = 0
-        self._active = True
         signal.signal(signal.SIGTERM, self.__stop_consuming)
 
-
     def send_eof(self):
-        logging.info(f'action: eof_ack | result: sended')
-        self._channel.basic_publish(exchange='', routing_key='eof-manager', body=SERVER_ACK)
+        self._middleware.send_eof()
 
     def wait_for_results(self):
-        self._channel.basic_consume(queue='final-results', on_message_callback=self.__callback, auto_ack=True)
-        self._channel.start_consuming()
+        self._middleware.receive_results(self.__results_callback)
 
-    def __callback(self, ch, method, properties, body):
-        type_result = body[0]
-        logging.info(f"Resultados: {body}")
+    def __results_callback(self, data):
+        logging.info(f"Resultados: {data}")
         self._results_received += 1
-        self._queue_to_send_results.put(body)
+        self._queue_to_send_results.put(data)
         if self._results_received == self._n_queries:
-            self._active = False
-            self._channel.stop_consuming()
-
+            self._middlewate.stop_receiving()
 
     def __stop_consuming(self, *args):
-        if self._active:
-            self._channel.stop_consuming()
-
-    def __del__(self):
-        self._connection.close()
+        self._middlewate.stop_receiving()

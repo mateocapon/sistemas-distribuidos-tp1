@@ -1,7 +1,4 @@
-FROM ubuntu:20.04
-
-RUN apt update && apt install python3 python3-pip -y
-RUN pip3 install pika
+FROM rabbitmq-python-base:0.0.1
 
 COPY server /
 ENTRYPOINT ["/bin/sh"]

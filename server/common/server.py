@@ -5,10 +5,10 @@ import queue
 import multiprocessing as mp
 from common.clienthandler import handle_client_connection
 from common.resultshandler import wait_for_results
-from common.protocol import Protocol
+from common.serverprotocol import ServerProtocol
 
 class Server:
-    def __init__(self, port, listen_backlog, n_workers, n_cities, n_queries):
+    def __init__(self, port, listen_backlog, n_workers, n_cities, n_queries, max_package_size):
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind(('', port))
         self._server_socket.listen(listen_backlog)
@@ -16,10 +16,12 @@ class Server:
         self._n_workers = min(n_workers, n_cities)
         self._n_cities = n_cities
         self._n_queries = n_queries
+        self._max_package_size = max_package_size
         self._workers_results_error = mp.Queue()
         self._clients_accepted_queue = mp.Queue()
         self._workers = [mp.Process(target=handle_client_connection, 
-                                    args=(self._clients_accepted_queue,self._workers_results_error))
+                                    args=(self._clients_accepted_queue, 
+                                          self._max_package_size, self._workers_results_error))
                         for i in range(self._n_workers)]
         self._workers_active = True           
         signal.signal(signal.SIGTERM, self.__stop_accepting)
@@ -54,7 +56,7 @@ class Server:
 
         try:
             results_received = 0 
-            protocol = Protocol()
+            protocol = ServerProtocol(self._max_package_size)
             while results_received < self._n_queries:
                 client_sock = self.__accept_new_connection()
                 if not client_sock:
