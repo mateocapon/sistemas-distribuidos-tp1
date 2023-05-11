@@ -5,7 +5,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 from common.files_reader import files_reader
 import time
-from common.protocol import Protocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PER_YEAR, RESULTS_AVERAGE_DISTANCE
+from common.clientprotocol import ClientProtocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PER_YEAR, RESULTS_AVERAGE_DISTANCE
 
 class Client:
     def __init__(self, server_ip, server_port, n_readers, cities,
@@ -60,7 +60,7 @@ class Client:
     def __wait_for_results(self):
         n_results_received = 0
         polling_sleep_time = 1
-        protocol = Protocol(self._max_package_size)
+        protocol = ClientProtocol(self._max_package_size)
         while n_results_received < self._n_queries:
             self._skt = socket.socket()
             self._skt.connect(self._server_addr)

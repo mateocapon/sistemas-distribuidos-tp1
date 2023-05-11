@@ -3,7 +3,7 @@ import socket
 import signal
 import csv
 from common.trip import Trip
-from common.protocol import Protocol
+from common.clientprotocol import ClientProtocol
 from common.station import Station
 from common.weather import Weather
 import time
@@ -31,7 +31,7 @@ class FilesReader:
         self._server_addr = server_addr
         self._skt = socket.socket()
         self._skt.connect(server_addr)
-        self._protocol = Protocol(max_package_size)
+        self._protocol = ClientProtocol(max_package_size)
         signal.signal(signal.SIGTERM, self.__stop_reader)
 
     def process_files(self, city):
