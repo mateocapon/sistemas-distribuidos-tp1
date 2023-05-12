@@ -41,7 +41,6 @@ class Middleware:
         self._channel.basic_publish(exchange='', routing_key=EOF_MANAGER, body=data)
 
     def __callback(self, ch, method, properties, body):
-        logging.info("entra en el callback")
         self._callback(body)
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
