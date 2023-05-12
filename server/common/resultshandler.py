@@ -1,4 +1,3 @@
-import pika
 import logging
 from common.servermiddleware import ServerMiddleware
 import signal

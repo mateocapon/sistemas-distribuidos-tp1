@@ -1,9 +1,8 @@
-from common.middleware import Middleware
+from common.middleware import Middleware, EOF_MANAGER
 from common.serverserializer import SERVER_ACK
 import logging
 
 WORKER_CHUNKS = "task_queue"
-EOF_MANAGER = "eof-manager"
 FINAL_RESULTS = "final-results"
 
 class ServerMiddleware(Middleware):
@@ -21,4 +20,5 @@ class ServerMiddleware(Middleware):
 
     def send_eof(self):
         logging.info(f'action: eof_ack | result: sended')
-        self._channel.basic_publish(exchange='', routing_key=EOF_MANAGER, body=SERVER_ACK)
+        self.send_eof_ack(SERVER_ACK)
+      

@@ -1,6 +1,8 @@
 import pika
 import logging
+
 HOST = 'rabbitmq'
+EOF_MANAGER = "eof-manager"
 
 class Middleware:
     def __init__(self):
@@ -18,7 +20,6 @@ class Middleware:
         self._connection.close()
 
     def send_workers(self, routing_key, data):
-        logging.info("Enviando a workers")
         self._channel.basic_publish(
             exchange='',
             routing_key=routing_key,
@@ -35,6 +36,9 @@ class Middleware:
         logging.info(f"Escuchando en la queue {queue_consume}")
         self._channel.basic_consume(queue=queue_consume, on_message_callback=self.__callback)
         self._channel.start_consuming()
+
+    def send_eof_ack(self, data):
+        self._channel.basic_publish(exchange='', routing_key=EOF_MANAGER, body=data)
 
     def __callback(self, ch, method, properties, body):
         logging.info("entra en el callback")

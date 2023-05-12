@@ -3,6 +3,7 @@ INT16_SIZE = 2
 INT32_SIZE = 4
 UINT32_SIZE = 4
 SCALE_FLOAT = 100
+FLOAT_ENCODED_LEN = UINT32_SIZE
 
 # YYYY-MM-DD HH:MM:SS
 DATE_TRIP_LEN = 19
@@ -40,9 +41,12 @@ class Serializer:
         return size + encoded
 
     def decode_string(self, to_decode):
+        return self.decode_string_to_bytes(to_decode).decode('utf-8')
+
+    def decode_string_to_bytes(self, to_decode):
         size_string = self.decode_uint16(to_decode[:UINT16_SIZE])
         decoded = to_decode[UINT16_SIZE: UINT16_SIZE + size_string]
-        return decoded.decode('utf-8')
+        return decoded
 
     def encode_float(self, to_encode):
         try:
@@ -59,3 +63,6 @@ class Serializer:
         if len(encoded) != type_date:
             raise ValueError(f"Date to encode has invalid size: {to_encode}")
         return encoded
+
+    def string_to_bytes(self, string):
+        return string.encode("utf-8")

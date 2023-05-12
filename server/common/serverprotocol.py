@@ -1,6 +1,5 @@
 import socket
 import logging
-import pika
 from common.protocol import Protocol
 
 TYPE_POS = 0
