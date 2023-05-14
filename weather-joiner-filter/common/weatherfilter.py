@@ -5,7 +5,6 @@ import logging
 import signal
 
 
-
 class WeatherFilter:
     def __init__(self, city, prectot_cond, n_average_duration_processes):
         self._middleware = WeatherFilterMiddleware(city)
