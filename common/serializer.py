@@ -40,6 +40,10 @@ class Serializer:
         size = self.encode_uint16(len(encoded))
         return size + encoded
 
+    def encode_bytes(self, bytes_string):
+        size = self.encode_uint16(len(bytes_string))
+        return size + bytes_string
+
     def decode_string(self, to_decode):
         return self.decode_string_to_bytes(to_decode).decode('utf-8')
 
