@@ -3,7 +3,7 @@ docker-image:
 	docker build -f ./server/Dockerfile -t "server:latest" .
 	docker build -f ./client/Dockerfile -t "client:latest" .
 	docker build -f ./packet-distributor/Dockerfile -t "packet-distributor:latest" .
-	docker build -f ./pipeline-average-time-weather/weather-filter/Dockerfile -t "weather-filter:latest" .
+	docker build -f ./weather-joiner-filter/Dockerfile -t "weather-filter:latest" .
 	docker build -f ./pipeline-average-time-weather/average-duration/Dockerfile -t "average-duration:latest" .
 	docker build -f ./pipeline-average-time-weather/results-collector/Dockerfile -t "results-collector-average:latest" .
 	docker build -f ./eof-manager/Dockerfile -t "eof-manager:latest" .
