@@ -51,8 +51,10 @@ def main():
     try:
         average_duration = DurationStorage(process_id)
         average_duration.run()
-    except OSError as e:
-        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: initialize_packet_distributor | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: initialize_packet_distributor | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

@@ -62,8 +62,10 @@ def main():
     try:
         server = Server(port, listen_backlog, number_processes_pool, n_cities, n_queries, max_package_size)
         server.run()
-    except OSError as e:
-        logging.error(f'action: initialize_server | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: initialize_server | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: initialize_server | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

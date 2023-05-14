@@ -74,8 +74,10 @@ def main():
                                  stations_joiner_per_city, n_duration_average, 
                                  n_distance_join_parser, join_parser_city, n_distance_calculator)
         eof_manager.run()
-    except OSError as e:
-        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: run_eof_manager | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: run_eof_manager | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

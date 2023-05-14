@@ -51,8 +51,10 @@ def main():
     try:
         results_collector = ResultsCollector(n_cities)
         results_collector.run()
-    except OSError as e:
-        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: initialize_results_collector | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: initialize_results_collector | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

@@ -66,12 +66,14 @@ def main():
                   f"chunk_size: {chunk_size} | max_package_size: {max_package_size} | "
                   f"number_readers: {number_readers} | cities: {cities}")
 
-    #try:
-    client = Client(server_ip, server_port, number_readers, cities.split(','), 
-                    chunk_size, max_package_size, n_queries, chunk_size_trips)
-    client.run()
-    #except:
-    #   logging.error(f'action: run_client | result: fail | error: unknown')
+    try:
+        client = Client(server_ip, server_port, number_readers, cities.split(','), 
+                        chunk_size, max_package_size, n_queries, chunk_size_trips)
+        client.run()
+    except Exception as e:
+      logging.error(f'action: run_client | result: fail | error: {str(e)}')
+    except:
+      logging.error(f'action: run_client | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

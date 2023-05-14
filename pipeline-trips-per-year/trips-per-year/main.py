@@ -55,8 +55,10 @@ def main():
     try:
         trips_per_year = TripsPerYear(city, first_year_compare, second_year_compare)
         trips_per_year.run()
-    except OSError as e:
-        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: initialize_trips_per_year | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: initialize_trips_per_year | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

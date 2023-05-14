@@ -19,6 +19,7 @@ class WeatherFilter:
     def run(self):
         self._middleware.receive_weather(self.__weather_callback)
         self._middleware.receive_trips(self.__trips_callback)
+        self._middleware.stop()
 
 
     def __weather_callback(self, body):

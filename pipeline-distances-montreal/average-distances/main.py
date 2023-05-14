@@ -51,8 +51,10 @@ def main():
     try:
         average_distances = AverageDistances(minumum_distance_km)
         average_distances.run()
-    except OSError as e:
-        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: run_average_duration | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: run_average_duration | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

@@ -51,8 +51,10 @@ def main():
     try:
         stations_joiner = StationsJoiner(city)
         stations_joiner.run()
-    except OSError as e:
-        logging.error(f'action: initialize_packet_distributor | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: initialize_stations_joiner | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: initialize_stations_joiner | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """

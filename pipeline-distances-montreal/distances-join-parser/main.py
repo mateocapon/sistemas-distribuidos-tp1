@@ -49,8 +49,10 @@ def main():
     try:
         join_parser = DistancesJoinParser(city)
         join_parser.run()
-    except OSError as e:
-        logging.error(f'action: initialize_distances_join_parser | result: fail | error: {e}')
+    except Exception as e:
+        logging.error(f'action: initialize_distances_join_parser | result: fail | error: {str(e)}')
+    except:
+        logging.error(f'action: initialize_distances_join_parser | result: fail | error: unknown')
 
 def initialize_log(logging_level):
     """
