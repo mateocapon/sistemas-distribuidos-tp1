@@ -17,7 +17,7 @@ class StationsJoiner:
         self._chunks_received = 0
         self._last_chunk_number = -1
 
-        signal.signal(signal.SIGTERM, self.__stop_connection)
+        signal.signal(signal.SIGTERM, self.__stop_working)
 
 
     def run(self):
@@ -79,5 +79,5 @@ class StationsJoiner:
         self._middleware.send_eof_ack()
         self._middleware.stop_receiving()
 
-    def __stop_connection(self, *args):
+    def __stop_working(self, *args):
         self._middleware.stop()
