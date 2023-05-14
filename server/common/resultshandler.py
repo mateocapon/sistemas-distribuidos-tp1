@@ -32,7 +32,7 @@ class ResultsHandler:
         self._results_received += 1
         self._queue_to_send_results.put(data)
         if self._results_received == self._n_queries:
-            self._middlewate.stop_receiving()
+            self._middleware.stop_receiving()
 
     def __stop_consuming(self, *args):
-        self._middlewate.stop_receiving()
+        self._middleware.stop_receiving()

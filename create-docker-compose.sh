@@ -10,7 +10,7 @@ N_PACKET_DISTRIBUTOR=3
 NUMBER_AVERAGE_DURATION_PROCESSES=3
 N_DISTANCES_JOIN_PARSER=1
 CITY_TO_CALC_DISTANCE="montreal"
-N_DISTANCE_CALCULATOR=2
+N_DISTANCE_CALCULATOR=4
 
 FIRST_YEAR_COMPARE=2016
 SECOND_YEAR_COMPARE=2017
@@ -51,7 +51,7 @@ echo "
       - CITIES=$CITIES
     volumes:
       - ./client/config.ini:/config.ini
-      - ./.data/archive:/data
+      - ./.data/dev:/data
     networks:
       - testing_net
     depends_on:

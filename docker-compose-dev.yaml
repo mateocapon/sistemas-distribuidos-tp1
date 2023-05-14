@@ -263,7 +263,7 @@ services:
       - NUMBER_AVERAGE_DURATION_PROCESSES=3
       - N_DISTANCES_JOIN_PARSER=1
       - DISTANCES_JOIN_PARSER_CITY=montreal
-      - N_DISTANCE_CALCULATOR=2
+      - N_DISTANCE_CALCULATOR=4
     networks:
       - testing_net
     depends_on:
@@ -458,6 +458,34 @@ services:
 
   distance-calculator-1:
     container_name: distance-calculator-1
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-2:
+    container_name: distance-calculator-2
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-3:
+    container_name: distance-calculator-3
     image: distance-calculator:latest
     entrypoint: python3 /main.py
     environment:
