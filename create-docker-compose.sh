@@ -1,23 +1,8 @@
 #!/bin/bash
 
-CITIES="montreal,toronto,washington"
-# el primer numero es la cantidad para la primera ciudad, el segundo para la segunda,etc.
-N_WEATHER_FILTER="2,1,2"
-N_STATIONS_JOINER="3,1,2"
+config=$(cat ./config.txt)
 
-N_PACKET_DISTRIBUTOR=3
-
-NUMBER_AVERAGE_DURATION_PROCESSES=2
-N_DISTANCES_JOIN_PARSER=1
-CITY_TO_CALC_DISTANCE="montreal"
-N_DISTANCE_CALCULATOR=5
-
-FIRST_YEAR_COMPARE=2016
-SECOND_YEAR_COMPARE=2017
-PRECTOT_COND=30
-MINIMUM_DISTANCE_KM=6
-
-
+eval "$config"
 
 N_CITIES=$(echo $CITIES | tr ',' '\n' | wc -l)
 
@@ -51,7 +36,8 @@ echo "
       - CITIES=$CITIES
     volumes:
       - ./client/config.ini:/config.ini
-      - ./.data/dev:/data
+      - $DATA_PATH:/data
+      - ./client/results:/results
     networks:
       - testing_net
     depends_on:

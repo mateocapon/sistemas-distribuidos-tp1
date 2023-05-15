@@ -4,6 +4,7 @@ from common.packet_distributor_serializer import PacketDistributorSerializer
 from common.trips_distributor import TripsDistributor
 from common.stations_distributor import StationsDistributor
 from common.weather_distributor import WeatherDistributor
+import signal
 
 class PacketDistributor:
     def __init__(self, first_year_compare, second_year_compare, city_to_calc_distance):
@@ -13,6 +14,7 @@ class PacketDistributor:
                                                    second_year_compare, city_to_calc_distance)
         self._stations_distributor = StationsDistributor(self._middleware)
         self._weather_distributor = WeatherDistributor(self._middleware)
+        signal.signal(signal.SIGTERM, self.__stop_working)
 
     def run(self):
         self._middleware.receive_chunks(self.__callback)
@@ -30,4 +32,7 @@ class PacketDistributor:
     def __process_eof(self):
         self._middleware.send_eof()
         self._middleware.stop_receiving()
+
+    def __stop_working(self, *args):
+        self._middleware.stop()
 

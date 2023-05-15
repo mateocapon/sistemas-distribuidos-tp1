@@ -14,14 +14,18 @@ class Middleware:
         self._callback = self.__no_callback
 
     def stop(self):
-        if self._active_channel:
-            self._active_channel = False
-            self._channel.stop_consuming()
-        if not self._active_connection:
-            raise Exception("Already Stopped")
-        self._active_connection = False
-        self._connection.close()
+        try:
+            if self._active_channel:
+                self._active_channel = False
+                self._channel.stop_consuming()
+            if not self._active_connection:
+                raise Exception("Already Stopped")
+            self._active_connection = False
+            self._connection.close()
+        except OSError as e:
+            logging.error(f"action: del_middleware | result: fail | error: {str(e)}")
 
+        
     def send_workers(self, routing_key, data):
         self._channel.basic_publish(
             exchange='',
@@ -57,8 +61,11 @@ class Middleware:
         self._channel.stop_consuming()
 
     def __del__(self):
-        if self._active_channel:
-            self._active_channel = False
-            self._channel.stop_consuming()
-        if self._active_connection:
-            self._connection.close()
+        try:
+            if self._active_channel:
+                self._active_channel = False
+                self._channel.stop_consuming()
+            if self._active_connection:
+                self._connection.close()
+        except OSError as e:
+            logging.error(f"action: del_middleware | result: fail | error: {str(e)}")
