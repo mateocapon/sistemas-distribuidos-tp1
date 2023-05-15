@@ -1,0 +1,9 @@
+Los nombres de estaciones de Montreal para la que el promedio de los ciclistas recorren másde 6km en llegar a ellas.
+Cantidad de estaciones: 6
+Estacion - Distancia Promedio
+Ontario / Viau - 6.95
+Desjardins / Hochelaga - 6.35
+de Gaspé / de Liège - 6.61
+de Maisonneuve / Mansfield - 6.66
+de Clifton / Sherbrooke - 6.81
+Métro Angrignon - 7.7

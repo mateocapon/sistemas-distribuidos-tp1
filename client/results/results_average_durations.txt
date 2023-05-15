@@ -1,0 +1,3 @@
+La duración promedio de viajes que iniciaron en días con precipitaciones mayores a 30mm.
+Cantidad de fechas: 0
+Fecha - Promedio

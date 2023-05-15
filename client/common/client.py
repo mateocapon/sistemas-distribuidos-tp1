@@ -4,6 +4,7 @@ import socket
 from multiprocessing import Pool
 import multiprocessing as mp
 from common.files_reader import files_reader
+from common.results_writer import ResultsWriter
 import time
 from common.clientprotocol import ClientProtocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PER_YEAR, RESULTS_AVERAGE_DISTANCE
 
@@ -39,6 +40,7 @@ class Client:
         self._workers_active = True
         self._client_active = True
         self._skt = None
+        self._results_writer = ResultsWriter()
         signal.signal(signal.SIGTERM, self.__stop_client)
 
     def run(self):
@@ -77,27 +79,13 @@ class Client:
 
 
     def __log_results(self, results):
-        logging.info(f"Por imprimir {len(results)} results")
         for type_result, result in results:
-            file_name = "results"
             if type_result == RESULTS_AVERAGE_DURATION[0]:
-                file_name = "results_average_durations.txt"
-                logging.info(f"La duración promedio de viajes que iniciaron en días con precipitaciones mayores a 30mm.")
-                logging.info(f"Cantidad de fechas: {len(result)}")
+                self._results_writer.write_average_durations(result)
             elif type_result == RESULTS_TRIPS_PER_YEAR[0]:
-                file_name = "results_trips_per_year.txt"
-                logging.info(f"Los nombres de las estaciones que al menos duplicaron la cantidad de viajes iniciados en"
-                              "ellas entre 2016 y el 2017.")
-                n_stations = sum([len(city_data[1]) for city_data in result])
-                logging.info(f"Cantidad de estaciones: {n_stations}")
+                self._results_writer.write_trips_per_year(result)
             elif type_result == RESULTS_AVERAGE_DISTANCE[0]:
-                file_name = "results_average_distance.txt"
-                logging.info("Los nombres de estaciones de Montreal para la que el promedio de los ciclistas recorren más"
-                                "de 6km en llegar a ellas.")
-                logging.info(f"Cantidad de estaciones: {len(result)}")
-            logging.info(f"Resultados: {result}")
-            # with open("results/"+file_name, "w") as file:
-            #     file.write(result)
+                self._results_writer.write_average_distances(result)
 
 
     def __stop_client(self, *args):

@@ -26,7 +26,7 @@ services:
       - CITIES=montreal,toronto,washington
     volumes:
       - ./client/config.ini:/config.ini
-      - ./.data/archive:/data
+      - ./.data/dev:/data
       - ./client/results:/results
     networks:
       - testing_net
@@ -106,23 +106,6 @@ services:
         condition: service_healthy
 
 
-  weather-filter-montreal2:
-    container_name: weather-filter-montreal2
-    image: weather-filter:latest
-    entrypoint: python3 /main.py
-    environment:
-      - PYTHONUNBUFFERED=1
-      - LOGGING_LEVEL=INFO
-      - CITY=montreal
-      - NUMBER_AVERAGE_DURATION_PROCESSES=2
-      - PRECTOT_COND=30
-    networks:
-      - testing_net
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-
   weather-filter-toronto1:
     container_name: weather-filter-toronto1
     image: weather-filter:latest
@@ -142,23 +125,6 @@ services:
 
   weather-filter-washington1:
     container_name: weather-filter-washington1
-    image: weather-filter:latest
-    entrypoint: python3 /main.py
-    environment:
-      - PYTHONUNBUFFERED=1
-      - LOGGING_LEVEL=INFO
-      - CITY=washington
-      - NUMBER_AVERAGE_DURATION_PROCESSES=2
-      - PRECTOT_COND=30
-    networks:
-      - testing_net
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-
-  weather-filter-washington2:
-    container_name: weather-filter-washington2
     image: weather-filter:latest
     entrypoint: python3 /main.py
     environment:
@@ -227,12 +193,12 @@ services:
       - LOGGING_LEVEL=INFO
       - N_PACKET_DISTRIBUTOR=2
       - CITIES=montreal,toronto,washington
-      - N_WEATHER_FILTER_PER_CITY=2,1,2
-      - N_STATIONS_JOINER_PER_CITY=2,1,2
+      - N_WEATHER_FILTER_PER_CITY=1,1,1
+      - N_STATIONS_JOINER_PER_CITY=1,1,1
       - NUMBER_AVERAGE_DURATION_PROCESSES=2
       - N_DISTANCES_JOIN_PARSER=1
       - DISTANCES_JOIN_PARSER_CITY=montreal
-      - N_DISTANCE_CALCULATOR=2
+      - N_DISTANCE_CALCULATOR=10
     networks:
       - testing_net
     depends_on:
@@ -242,21 +208,6 @@ services:
 
   stations-joiner-montreal1:
     container_name: stations-joiner-montreal1
-    image: stations-joiner:latest
-    entrypoint: python3 /main.py
-    environment:
-      - PYTHONUNBUFFERED=1
-      - LOGGING_LEVEL=INFO
-      - CITY=montreal
-    networks:
-      - testing_net
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-
-  stations-joiner-montreal2:
-    container_name: stations-joiner-montreal2
     image: stations-joiner:latest
     entrypoint: python3 /main.py
     environment:
@@ -287,21 +238,6 @@ services:
 
   stations-joiner-washington1:
     container_name: stations-joiner-washington1
-    image: stations-joiner:latest
-    entrypoint: python3 /main.py
-    environment:
-      - PYTHONUNBUFFERED=1
-      - LOGGING_LEVEL=INFO
-      - CITY=washington
-    networks:
-      - testing_net
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-
-  stations-joiner-washington2:
-    container_name: stations-joiner-washington2
     image: stations-joiner:latest
     entrypoint: python3 /main.py
     environment:
@@ -412,6 +348,118 @@ services:
 
   distance-calculator-1:
     container_name: distance-calculator-1
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-2:
+    container_name: distance-calculator-2
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-3:
+    container_name: distance-calculator-3
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-4:
+    container_name: distance-calculator-4
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-5:
+    container_name: distance-calculator-5
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-6:
+    container_name: distance-calculator-6
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-7:
+    container_name: distance-calculator-7
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-8:
+    container_name: distance-calculator-8
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-9:
+    container_name: distance-calculator-9
     image: distance-calculator:latest
     entrypoint: python3 /main.py
     environment:
