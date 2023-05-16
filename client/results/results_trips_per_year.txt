@@ -1,5 +1,9 @@
 Los nombres de las estaciones que al menos duplicaron la cantidad de viajes iniciados enellas entre 2016 y el 2017.
 Cantidad de estaciones: 19
+Ciudad: washington
+Estacion - Cantidad en 2016 - Cantidad en 2017
+Ciudad: toronto
+Estacion - Cantidad en 2016 - Cantidad en 2017
 Ciudad: montreal
 Estacion - Cantidad en 2016 - Cantidad en 2017
 Hutchison/ Prince-Arthur - 1 - 5
@@ -21,7 +25,3 @@ Square St-Louis - 2 - 7
 de la Montagne / Sherbrooke - 1 - 5
 Roy / St-Laurent - 1 - 5
 Roy / St-Denis - 1 - 3
-Ciudad: washington
-Estacion - Cantidad en 2016 - Cantidad en 2017
-Ciudad: toronto
-Estacion - Cantidad en 2016 - Cantidad en 2017
