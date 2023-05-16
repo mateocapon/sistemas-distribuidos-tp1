@@ -21,6 +21,7 @@ docker-image:
 .PHONY: docker-image
 
 docker-compose-up: docker-image
+	sh create-docker-compose.sh
 	docker compose -f docker-compose-dev.yaml up -d --build
 .PHONY: docker-compose-up
 

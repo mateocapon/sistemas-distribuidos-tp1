@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from configparser import ConfigParser
-from common.distance_calculator import DistanceCalculator
+from common.v2_efficient.distance_calculator import DistanceCalculator as EfficientDC
+from common.v1_separated_responsabilities.distance_calculator import DistanceCalculator as SeparatedResponsabilitiesDC
 import logging
 import os
 
@@ -27,6 +28,7 @@ def initialize_config():
     config_params = {}
     try:
         config_params["logging_level"] = os.getenv('LOGGING_LEVEL', config["DEFAULT"]["LOGGING_LEVEL"])
+        config_params["efficient"] = bool(int(os.getenv('EFFICIENT', config["DEFAULT"]["EFFICIENT"])))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting packet-distributor".format(e))
     except ValueError as e:
@@ -38,15 +40,18 @@ def initialize_config():
 def main():
     config_params = initialize_config()
     logging_level = config_params["logging_level"]
-
+    efficient = config_params["efficient"]
     initialize_log(logging_level)
 
     # Log config parameters at the beginning of the program to verify the configuration
     # of the component
-    logging.debug(f"action: config | result: success | logging_level: {logging_level}")
+    logging.info(f"action: config | result: success | efficient_dc: {efficient}| "
+                  f"logging_level: {logging_level}")
 
     try:
-        calculator = DistanceCalculator()
+        calculator = SeparatedResponsabilitiesDC()
+        if efficient:
+            calculator = EfficientDC()
         calculator.run()
     except Exception as e:
         logging.error(f'action: initialize_distance_calculator | result: fail | error: {str(e)}')

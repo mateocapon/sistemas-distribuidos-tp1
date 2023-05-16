@@ -19,6 +19,7 @@ class DistanceCalculator:
             return
         for init, end, other_data in self._serializer.decode_locations(body):
             distance = haversine(init, end)
+            # logging.info(f"Init: {init}, end: {end}, distance: {distance}")
             self._serializer.add_result(distance, other_data)
         results, send_response_to = self._serializer.encode_results()
         self._middleware.send_results(results, send_response_to)

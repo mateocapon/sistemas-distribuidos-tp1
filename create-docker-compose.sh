@@ -45,7 +45,7 @@ echo "
     deploy:
       resources:
         limits:
-          cpus: '0.35'
+          cpus: $CLIENT_CPU_LIMIT
 " >> docker-compose-dev.yaml
 
 
@@ -255,6 +255,7 @@ echo "
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
+      - EFFICIENT=$EFFICIENT_DC
     networks:
       - testing_net
     depends_on:

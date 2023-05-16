@@ -1,4 +1,4 @@
-
+import logging
 
 class ResultsWriter:
     def write_average_durations(self, results):
@@ -9,6 +9,7 @@ class ResultsWriter:
             file.write(f"Fecha - Promedio\n")
             for date, average in results:
                 file.write(f"{date} - {average}\n")
+        logging.info("action: write_results | file: client/results/results_average_durations.txt")
 
     def write_trips_per_year(self, results):
         with open("results/results_trips_per_year.txt", "w") as file:
@@ -22,6 +23,7 @@ class ResultsWriter:
                 file.write(f"Estacion - Cantidad en 2016 - Cantidad en 2017\n")
                 for station, first_year_compare, second_year_compare in city_data[1]:
                     file.write(f"{station} - {first_year_compare} - {second_year_compare}\n")
+        logging.info("action: write_results | file: client/results/results_trips_per_year.txt")
 
 
     def write_average_distances(self, results):
@@ -33,3 +35,4 @@ class ResultsWriter:
             file.write(f"Estacion - Distancia Promedio\n")
             for station, average_distance in results:
                 file.write(f"{station} - {average_distance}\n")
+        logging.info("action: write_results | file: client/results/results_average_distance.txt")

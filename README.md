@@ -6,11 +6,7 @@
 
 
 ## Build
-Cambiar las variables de configuracion en el archivo `config.txt`. Ejecutar el script `create-docker-compose.sh`.
-
-```bash
-sh create-docker-compose.sh
-```
+Cambiar las variables de configuracion en el archivo `config.txt`.
 
 Ejecutar al sistema con:
 

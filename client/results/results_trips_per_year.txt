@@ -1,27 +1,221 @@
 Los nombres de las estaciones que al menos duplicaron la cantidad de viajes iniciados enellas entre 2016 y el 2017.
-Cantidad de estaciones: 19
+Cantidad de estaciones: 213
 Ciudad: washington
 Estacion - Cantidad en 2016 - Cantidad en 2017
-Ciudad: toronto
-Estacion - Cantidad en 2016 - Cantidad en 2017
+14th & Irving St NW - 8321 - 22389
+17th St & Independence Ave SW - 13733 - 30088
+Vermont Ave & I St NW - 3307 - 9961
+Potomac & Swann Ave - 1186 - 3742
+4th St & Madison Dr NW - 18263 - 37751
+Mount Vernon Ave & Four Mile Run Park - 435 - 1617
+Franklin & S Washington St - 1031 - 2476
+New Jersey Ave & L St NW - 1368 - 4401
+East Falls Church Metro/Sycamore St & 19th St N - 616 - 1350
+22nd St & Constitution Ave NW - 1231 - 8268
+N Lynn St & Fairfax Dr - 292 - 5243
+1st & D St SE - 3204 - 13741
+Powhatan St & Bashford Ln - 607 - 1456
+Mount Vernon Ave & Bruce St - 195 - 500
+24th & R St NE / National Arboretum - 752 - 2794
+16th & Q St SE / Anacostia HS - 151 - 711
+Alabama & MLK Ave SE - 236 - 555
+6th & K St NE - 48 - 7595
+Wisconsin Ave & Brandywine St NW - 712 - 2847
+Library St & Freedom Dr - 35 - 429
+Benning Rd & East Capitol St NE / Benning Rd Metro - 304 - 656
+Kennebec St & 11th St N - 260 - 1275
+Radford & Osage St - 243 - 738
+Commonwealth & E Monroe Ave - 596 - 1308
+Madison & Fairfax St - 171 - 3271
+Lee Center - 469 - 1133
+Sligo Ave & Carroll Ln - 37 - 1158
+Benning Branch Library - 216 - 501
+12th St & Pennsylvania Ave SE - 47 - 4925
+Westpark & Jones Branch Dr - 53 - 667
+61st St & Banks Pl NE - 19 - 81
+Greensboro & International Dr - 15 - 174
+3rd St & Riggs Rd NE - 8 - 592
+Westpark & Park Run Dr - 34 - 250
+Reston Station - 201 - 2302
+Carlin Springs Rd & N Thomas St - 16 - 1720
+Reston Town Center Transit Station - 94 - 1381
+Solutions & Greensboro Dr - 13 - 29
+Broschart & Blackwell Rd - 16 - 34
+Needwood Rd & Eagles Head Ct - 77 - 419
+Monroe St & Monroe Pl - 177 - 371
+Temporary Rd & Old Reston Ave - 55 - 518
+Sunset Hills & Old Reston Ave - 106 - 770
+New Dominion Pkwy & Fountain Dr - 41 - 248
+Town Center Pkwy & Bowman Towne Dr - 49 - 210
+Reston YMCA - 34 - 335
+Tysons West Transit Center - 16 - 130
+Towers Crescent Dr & Tysons One Pl - 3 - 125
+Tysons Corner Station - 11 - 932
+Spring Hill Metro - 28 - 211
+Jones Branch & Westbranch Dr - 32 - 86
+Reston Regional Library - 18 - 53
+Westpark Dr & Leesburg Pike - 8 - 146
 Ciudad: montreal
 Estacion - Cantidad en 2016 - Cantidad en 2017
-Hutchison/ Prince-Arthur - 1 - 5
-Sanguinet / Ontario - 1 - 6
-St-Hubert / Rachel - 1 - 4
-Augustin-Cantin / Shearer - 1 - 3
-Fairmount / St-Dominique - 1 - 3
-Villeneuve / St-Laurent - 1 - 5
-Berri / de Maisonneuve - 1 - 8
-Boyer / Beaubien - 4 - 11
-Ste-Catherine / McGill College - 2 - 8
-Square Sir-Georges-Étienne-Cartier / Léa Roback - 1 - 3
-Marché Atwater - 3 - 13
-Milton / Durocher - 1 - 4
-Napoléon /  St-Dominique - 1 - 5
-Duluth / St-Denis - 1 - 5
-Marquette / du Mont-Royal - 1 - 4
-Square St-Louis - 2 - 7
-de la Montagne / Sherbrooke - 1 - 5
-Roy / St-Laurent - 1 - 5
-Roy / St-Denis - 1 - 3
+Boyer / du Mont-Royal - 11366 - 24313
+St-Denis / de Maisonneuve - 4236 - 8884
+Marché Atwater - 11132 - 29159
+Jardin Botanique (Pie-IX / Sherbrooke) - 2915 - 8293
+Ciudad: toronto
+Estacion - Cantidad en 2016 - Cantidad en 2017
+Dundas St E / Regent Park Blvd - 4077 - 9993
+Riverdale Park North (Broadview Ave) - 1136 - 2472
+Union Station - 9378 - 22143
+Front St W / Blue Jays Way - 6274 - 16173
+Simcoe St / Wellington St W - 9112 - 21365
+Danforth Ave / Lamb Ave - 507 - 1077
+King St W / Spadina Ave - 8695 - 18039
+Dundas St E / Broadview Ave - 1436 - 3865
+51 Parliament St - 2348 - 4894
+Central Tech  (Harbord St) - 1053 - 3675
+Parliament St / Gerrard St - 1854 - 5461
+Wellesley St / Queen's Park Cres - 3298 - 7170
+Sherbourne St / Carlton St (Allan Gardens) - 4302 - 8865
+Victoria St / Gould St (Ryerson University) - 3581 - 10070
+King St E / River St - 2590 - 7635
+Bay St / College St (East Side) - 8284 - 17381
+Phoebe St / Spadina Ave - 6575 - 14777
+York St / Queens Quay W - 8761 - 19143
+St. George St / Hoskin Ave - 3355 - 8307
+Navy Wharf Ct. / Bremner Blvd. - 3554 - 7166
+University Ave / Elm St - 3258 - 7323
+Huron/ Harbord St - 3479 - 7475
+Bloor St / Brunswick Ave - 3956 - 9175
+Queen St W / Spadina Ave - 5236 - 10516
+Bay St / Wellesley St W - 8365 - 18082
+Spadina Ave / Sussex Ave - 3396 - 7145
+Beverly  St / Dundas St W - 5981 - 13745
+Dundas St W / Crawford St - 2308 - 6551
+Edward St / Yonge St - 4178 - 8887
+Elizabeth St / Edward St (Bus Terminal) - 4571 - 10099
+Willcocks St / St. George St - 4593 - 9787
+University Ave / Gerrard St W - 3366 - 7467
+Marlborough Ave / Yonge St - 610 - 1891
+Yonge St / Yorkville Ave - 2391 - 6462
+Bay St / St. Joseph St - 5587 - 12456
+Bloor St W / Christie St - 2253 - 5998
+Yonge St / Wood St - 3320 - 7564
+College Park South - 6786 - 15187
+Jarvis St / Isabella St - 4042 - 9589
+Bremner Blvd / Rees St - 4275 - 10913
+Bay St / Albert St - 7254 - 14912
+Front St E / Cherry St - 1487 - 4287
+Yonge St / Aylmer Ave - 728 - 1923
+University Ave / King St W - 5657 - 11831
+Augusta Ave / Dundas St W - 4077 - 8723
+Niagara St / Richmond St W - 5509 - 11134
+Augusta Ave / Denison Sq - 3754 - 8478
+Dockside Dr / Queens Quay E (Sugar Beach) - 5034 - 11995
+Bathurst St / Dundas St W - 4218 - 9783
+Gould St / Mutual St - 6224 - 12803
+Bond St / Queen St E - 4166 - 9041
+Riverdale Park South (Broadview Ave) - 1129 - 2997
+McGill St / Church St - 2340 - 7019
+Church St / Bloor St E - 4138 - 8464
+Ted Rogers Way / Bloor St E - 4064 - 9000
+Euclid Ave / Bloor St W - 2896 - 5929
+Gerrard St E / River St - 980 - 2674
+Queen St W / Dovercourt Rd - 2598 - 5412
+Hayter St / Laplante Ave - 2992 - 7454
+Dundas St E / Parliament St - 3660 - 7502
+King St E / Jarvis St - 4696 - 11361
+Simcoe St / Queen St W - 7287 - 15234
+Taddle Creek Park - 993 - 2848
+Bathurst St / Lennox St - 1898 - 3986
+Essex St / Christie St - 702 - 2207
+Lower Jarvis St / The Esplanade - 3649 - 7869
+Salem Ave / Bloor St W - 1091 - 3234
+Ossington Ave / Harrison St - 841 - 1998
+Claremont St / Dundas St W - 1494 - 3418
+King St W / Bay St (East Side) - 3705 - 8207
+Lower Sherbourne St / The Esplanade - 3092 - 7641
+Scott St / The Esplanade - 4229 - 9461
+Carlton St / Parliament St - 2035 - 5049
+Parliament St / Aberdeen Ave - 1591 - 5093
+Howard St / Sherbourne St - 2747 - 6672
+Nelson St / Duncan St - 1329 - 12890
+Queen St E / Berkely St - 866 - 2620
+Queen St E / Sackville St - 747 - 2691
+Sumach St / Carlton St. (Riverdale Farm) - 1131 - 2980
+Queen St W / York St (City Hall) - 3376 - 8548
+Castle Frank Station - 619 - 1514
+Jarvis St / Dundas St E - 1933 - 4547
+Richmond St E / Jarvis St Green P - 3003 - 7221
+Bay St / Davenport Rd - 1166 - 2708
+Boston Ave / Queen St E - 1722 - 4395
+Queen St E / George St (Moss Park) - 1430 - 4637
+Spadina Ave / Willcocks St - 1623 - 4793
+Queen St W / Gladstone Ave - 1678 - 5684
+Jimmie Simpson Park (Queen St E) - 1138 - 3611
+Seaton St / Dundas St E - 1887 - 4287
+Christie St / Benson Ave (Wychwood Barns) - 977 - 3300
+Danforth Ave / Ellerbeck St - 1048 - 3613
+Bathurst St / Queens Quay W - 634 - 8364
+Summerhill Station - 1401 - 3061
+King St W / Stafford St - 2438 - 6510
+Chester Station - 764 - 2237
+80 Clinton St (North of College) - 1156 - 3430
+Davenport Rd / Christie St - 565 - 1902
+Glen Edyth Dr / Davenport Rd - 1035 - 2881
+Danforth Ave / Gough Ave - 750 - 2595
+Parliament St / Bloor St E - 629 - 1746
+Davenport Rd / Avenue Rd - 710 - 2029
+Pape Subway Green P - 303 - 936
+Woodbine Subway Green P (Cedarvale Ave) - 157 - 420
+Donlands Station - 563 - 1367
+Danforth Ave / Westlake Ave - 131 - 414
+Danforth Ave / Barrington Ave - 218 - 698
+Danforth Ave / Aldridge Ave - 409 - 897
+Queen St W / Portland St - 7548 - 17295
+Bathurst Subway Station - 1390 - 3906
+Ossington Ave / Bloor St W - 1900 - 5858
+Fort York  Blvd / Capreol Crt - 5952 - 12737
+Queens Quay W / Dan Leckie Way - 3876 - 9805
+Bathurst St / Fort York Blvd - 4203 - 10424
+King St W / Tecumseth St - 4155 - 8560
+University Ave / College St - 4147 - 9474
+25 York St (ACC/Union Station South) - 3257 - 7436
+Queen St W / Ossington Ave - 2660 - 6022
+Queens Quay / Yonge St - 1410 - 9893
+Queens Quay W / Lower Simcoe St - 5557 - 13703
+Wellington St W / Portland St - 3548 - 11226
+Hanna Ave / Liberty St - 1515 - 4177
+East Liberty St / Pirandello St - 4430 - 10150
+Queen St W / Shaw St - 2269 - 5440
+Harbord St / Clinton St - 1157 - 3250
+Sterling Rd / Dundas St W - 880 - 2289
+Queen St W / Close Ave - 1381 - 3867
+Fort York Blvd / Garrison Rd - 1700 - 4916
+Strachan Ave / Princes' Blvd - 1601 - 5214
+Ontario Place Blvd / Remembrance Dr - 2767 - 14565
+Cherry St / Distillery Ln - 1469 - 4091
+Ulster St / Bathurst St - 1172 - 2976
+Queen St W / Cowan Ave - 782 - 2636
+Liberty St / Fraser Ave Green P - 1005 - 3234
+King St W / Douro St - 1345 - 3498
+Wellington St W / Stafford St - 748 - 2638
+Cariboo St / Rail Path - 475 - 2102
+Exhibition GO (Atlantic Ave) - 1092 - 3179
+Dufferin St / Sylvan Av (Dufferin Grove Park) - 700 - 2342
+Mary McCormick Rec Centre (Sheridan Ave) - 748 - 1752
+Roxton Rd / Harbord St - 833 - 2134
+King St W / Fraser Ave - 427 - 1343
+King St W / Joe Shuster Way - 759 - 3548
+Bridgeman Ave / Bathurst St - 390 - 1568
+Bridgeman Ave / Kendal Ave - 778 - 1697
+Bloor St W / Dundas St W - 818 - 2225
+Lansdowne Ave / Whytock Ave - 239 - 646
+Ossington Ave / College St W - 347 - 1166
+Dufferin St / Bloor St - 743 - 2100
+Dundas St W / Edna Ave - 482 - 1330
+Macpherson Ave / Spadina Rd - 1375 - 4043
+Cherry St / Mill St - 2304 - 5197
+Mill St / Tannery Rd - 1062 - 2752
+Davenport Rd / Bathurst St - 407 - 1328
+Yarmouth Rd / Christie St - 907 - 2917
+Palmerston Ave / Vermont Ave - 944 - 2049

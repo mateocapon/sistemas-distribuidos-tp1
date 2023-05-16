@@ -1,18 +1,23 @@
+# Se agrega limite de CPU en el cliente en funcion de un tuneo de parametros en mi PC.
+CLIENT_CPU_LIMIT="0.7"
+
 DATA_PATH="./.data/archive"
 
-
+# nombres de las ciudades separadas por coma ( , )
 CITIES="montreal,toronto,washington"
 
+# El proceso Distance Calculator se puede correr en modo 0 (esta separado el serializador del negocio), o como modo 1 (es aproximadamente un orden de magnitud mas eficiente)
+EFFICIENT_DC=1
 
 # el primer numero es la cantidad para la primera ciudad, el segundo para la segunda,etc.
 N_WEATHER_FILTER="2,1,2"
-N_STATIONS_JOINER="2,1,2"
+N_STATIONS_JOINER="3,1,2"
 
-N_PACKET_DISTRIBUTOR=2
+N_PACKET_DISTRIBUTOR=3
 
 NUMBER_AVERAGE_DURATION_PROCESSES=2
-N_DISTANCES_JOIN_PARSER=1
-N_DISTANCE_CALCULATOR=9
+N_DISTANCES_JOIN_PARSER=2
+N_DISTANCE_CALCULATOR=3
 
 
 CITY_TO_CALC_DISTANCE="montreal"
