@@ -25,15 +25,16 @@ class Middleware:
         except OSError as e:
             logging.error(f"action: del_middleware | result: fail | error: {str(e)}")
 
-        
-    def send_workers(self, routing_key, data):
+
+    def send(self, routing_key, data, exchange=''):
         self._channel.basic_publish(
-            exchange='',
+            exchange=exchange,
             routing_key=routing_key,
             body=data,
             properties=pika.BasicProperties(
                 delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
         ))
+
 
     def receive_data(self, callback, queue_consume):
         if self._active_channel:

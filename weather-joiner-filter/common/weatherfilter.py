@@ -52,7 +52,7 @@ class WeatherFilter:
         self._middleware.forward_results(data_for_average_duration, SIMPLE_TRIP)
 
     def __process_eof(self):
-        self._middleware.send_eof(WEATHER_FILTER_ACK)
+        self._middleware.send_eof_ack(WEATHER_FILTER_ACK)
         self._middleware.stop_receiving()
 
     def __stop_working(self, *args):

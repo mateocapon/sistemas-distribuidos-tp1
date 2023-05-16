@@ -23,6 +23,4 @@ class AverageDistancesMiddleware(Middleware):
 
 
     def send_results(self, results):
-        self._channel.basic_publish(exchange='', 
-                            routing_key='final-results',
-                            body=results)
+        self.send('final-results', results)

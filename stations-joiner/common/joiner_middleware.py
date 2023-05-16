@@ -1,5 +1,4 @@
 from common.middleware import Middleware
-from common.joiner_serializer import STATIONS_JOINER_ACK
 import logging
 
 class JoinerMiddleware(Middleware):
@@ -32,10 +31,5 @@ class JoinerMiddleware(Middleware):
         self.receive_data(trips_callback, self._trips_queue_name)
 
     def send_results(self, send_response_to, results, city):
-        self._channel.basic_publish(exchange='stations-join-results',
-                                    routing_key=send_response_to+"."+city,
-                                    body=results)
+        self.send(send_response_to+"."+city, results, 'stations-join-results')
 
-    def send_eof_ack(self):
-        self._channel.basic_publish(exchange='', routing_key='eof-manager', body=STATIONS_JOINER_ACK)
-        logging.info(f'action: eof_ack | result: sended')

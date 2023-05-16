@@ -20,6 +20,4 @@ class DurationMiddleware(Middleware):
         self.receive_data(callback, self._durations_queue_name)
 
     def send_results(self, results):
-        self._channel.basic_publish(exchange='',
-                                    routing_key='results-collector-average-duration',
-                                    body=results)
+        self.send('results-collector-average-duration', results)

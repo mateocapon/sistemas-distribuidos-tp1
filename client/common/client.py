@@ -8,6 +8,8 @@ from common.results_writer import ResultsWriter
 import time
 from common.clientprotocol import ClientProtocol, RESULTS_AVERAGE_DURATION, RESULTS_TRIPS_PER_YEAR, RESULTS_AVERAGE_DISTANCE
 
+MAX_POLLING_TIME = 8
+
 class Client:
     def __init__(self, server_ip, server_port, n_readers, cities,
                  chunk_size, max_package_size, n_queries, chunk_size_trips):
@@ -70,7 +72,7 @@ class Client:
             n_results_received += len(results)
             if len(results) == 0:
                 time.sleep(polling_sleep_time)
-                polling_sleep_time = polling_sleep_time * 2
+                polling_sleep_time = min(polling_sleep_time * 2, MAX_POLLING_TIME)
             else:
                 self.__log_results(results)
                 polling_sleep_time = 1

@@ -13,7 +13,7 @@ class ServerMiddleware(Middleware):
         self._channel.queue_declare(queue=FINAL_RESULTS, durable=True)
 
     def send_chunk(self, data):
-        self.send_workers(WORKER_CHUNKS, data)
+        self.send(WORKER_CHUNKS, data)
 
     def receive_results(self, results_callback):
         self.receive_data(results_callback, FINAL_RESULTS)

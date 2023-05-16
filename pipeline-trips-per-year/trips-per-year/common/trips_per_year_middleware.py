@@ -20,6 +20,4 @@ class TripsPerYearMiddleware(Middleware):
         self.receive_data(callback, self._trips_year_queue_name)
 
     def send_results(self, results):
-        self._channel.basic_publish(exchange='', 
-                            routing_key='results-collector-trips-per-year',
-                            body=results)
+        self.send('results-collector-trips-per-year', results)

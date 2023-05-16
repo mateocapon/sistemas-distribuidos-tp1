@@ -28,13 +28,7 @@ class WeatherFilterMiddleware(Middleware):
         self._channel.basic_qos(prefetch_count=1)
         self.receive_data(callback, self._trips_queue_name)
 
-    def send_eof(self, eof_msg):
-        logging.info(f'action: eof_ack | result: sended')
-        self._channel.basic_publish(exchange='', routing_key='eof-manager', body=eof_msg)
-
     def forward_results(self, results, header):
         for send_response_to, data in enumerate(results):
             if len(data) > 0:
-                self._channel.basic_publish(exchange='trips_duration', 
-                              routing_key=str(send_response_to), body=header+data)
-
+                self.send(str(send_response_to), header+data, 'trips_duration')

@@ -1,7 +1,8 @@
 import logging
 import signal
 from common.joiner_middleware import JoinerMiddleware
-from common.joiner_serializer import JoinerSerializer, TYPE_JOIN_ONLY_NAME, LAST_CHUNK_STATIONS
+from common.joiner_serializer import JoinerSerializer, TYPE_JOIN_ONLY_NAME, \
+                                     LAST_CHUNK_STATIONS, STATIONS_JOINER_ACK
 
 
 NAME_POS = 0
@@ -76,7 +77,7 @@ class StationsJoiner:
             return self._serializer.encode_name_location(name, latitude, longitude)
 
     def __process_eof(self):
-        self._middleware.send_eof_ack()
+        self._middleware.send_eof_ack(STATIONS_JOINER_ACK)
         self._middleware.stop_receiving()
 
     def __stop_working(self, *args):

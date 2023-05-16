@@ -25,9 +25,7 @@ class ParserMiddleware(Middleware):
 
     def send_eof(self):
         logging.info(f'action: eof_ack | result: sended')
-        self._channel.basic_publish(exchange='', 
-                                    routing_key='eof-manager',
-                                    body=DISTANCES_JOIN_PARSER_ACK)
+        self.send_eof_ack(DISTANCES_JOIN_PARSER_ACK)
 
     def forward(self, message):
-        self.send_workers(DISTANCE_CALCULATOR, message)
+        self.send(DISTANCE_CALCULATOR, message)

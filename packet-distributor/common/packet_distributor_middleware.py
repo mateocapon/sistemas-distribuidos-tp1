@@ -35,20 +35,16 @@ class PacketDistributorMiddleware(Middleware):
         self.send_eof_ack(PACKET_DISTRIBUTOR_ACK)
 
     def send_stations(self, city, data):
-        self._channel.basic_publish(exchange='stations_registries', 
-                                    routing_key=city, body=data)
+        self.send(city, data, 'stations_registries')
+
     def send_weather(self, city, data):
-        self._channel.basic_publish(exchange='weather_registries', 
-                                    routing_key=city, body=data)
+        self.send(city, data, 'weather_registries')
 
     def send_trips_weather_filter(self, city, data):
-        self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
-                                    routing_key=city, body=data)
+        self.send(city, data, 'trips_pipeline_average_time_weather')
 
     def send_trips_distance_query(self, city, data):
-        self._channel.basic_publish(exchange='stations_joiner', 
-                                    routing_key=city, body=data)
+        self.send(city, data, 'stations_joiner')
 
     def send_trips_year_query(self, city, data):
-        self._channel.basic_publish(exchange='stations_joiner', 
-                                    routing_key=city, body=data)
+        self.send(city, data, 'stations_joiner')

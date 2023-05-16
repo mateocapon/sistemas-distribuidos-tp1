@@ -59,65 +59,42 @@ class EOFManagerMiddleware(Middleware):
     def broadcast_packet_distributor_eof(self):
         logging.info(f'action: broadcast_eof | to: packet_distributor')
         for i in range(self._n_packet_distributor):
-            self._channel.basic_publish(
-                exchange='', 
-                routing_key='task_queue', 
-                body=PACKET_DISTRIBUTOR_EOF, 
-                properties=pika.BasicProperties(
-                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-            ))
+            self.send('task_queue', PACKET_DISTRIBUTOR_EOF)
 
     def broadcast_distance_calculator_eof(self):
         logging.info(f'action: broadcast_eof | to: distance_calculator')
         for i in range(self._n_distance_calculator):
-            self._channel.basic_publish(
-                exchange='', 
-                routing_key='distance-calculator', 
-                body=DISTANCE_CALCULATOR_EOF, 
-                properties=pika.BasicProperties(
-                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-            ))
+            self.send('distance-calculator', DISTANCE_CALCULATOR_EOF)
 
     def broadcast_weather_filter_eof(self):
         logging.info(f'action: broadcast_eof | to: weather_filter')
         for city in self._cities:
             for process in range(self._n_filter_per_city[city]):
-                self._channel.basic_publish(exchange='trips_pipeline_average_time_weather', 
-                                            routing_key=city, body=WEATHER_FILTER_EOF)
+                self.send(city, WEATHER_FILTER_EOF,'trips_pipeline_average_time_weather')
     
     def broadcast_stations_joiner_eof(self):
         logging.info(f'action: broadcast_eof | to: stations_joiner')
         for city in self._cities:
             for process in range(self._n_station_joiner_per_city[city]):
-                self._channel.basic_publish(exchange='stations_joiner', 
-                                            routing_key=city, body=STATIONS_JOINER_EOF)
+                self.send(city, STATIONS_JOINER_EOF, 'stations_joiner')
 
     def broadcast_average_duration_eof(self):
         logging.info(f'action: broadcast_eof | to: average_duration')
         for average_id in range(self._n_duration_average):
-            self._channel.basic_publish(exchange='trips_duration', 
-                          routing_key=str(average_id), body=AVERAGE_DURATION_EOF)
+            self.send(str(average_id), AVERAGE_DURATION_EOF, 'trips_duration')
         
     def broadcast_trips_per_year_eof(self):
         logging.info(f'action: broadcast_eof | to: trips_per_year')
         for city in self._cities:
-            self._channel.basic_publish(exchange='stations-join-results', 
-                          routing_key="trips_per_year."+city, body=TRIPS_PER_YEAR_EOF)
-   
+            self.send("trips_per_year."+city, TRIPS_PER_YEAR_EOF, 'stations-join-results')
+
 
     def broadcast_distance_join_parser_eof(self):
         logging.info(f'action: broadcast_eof | to: distance_join_parser')
         for i in range(self._n_distance_join_parser):
-            self._channel.basic_publish(
-                exchange='stations-join-results', 
-                routing_key="distances_join_parser."+self._join_parser_city, 
-                body=DISTANCES_JOIN_PARSER_EOF, 
-                properties=pika.BasicProperties(
-                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
-            ))
-
+            self.send("distances_join_parser."+self._join_parser_city, 
+                                    DISTANCES_JOIN_PARSER_EOF, 'stations-join-results') 
+ 
     def broadcast_average_distance_eof(self):
         logging.info(f'action: broadcast_eof | to: average_distances')
-        self._channel.basic_publish(exchange='calculator-results',
-                                    routing_key="average_distance",
-                                    body=AVERAGE_DISTANCE_EOF)
+        self.send("average_distance", AVERAGE_DISTANCE_EOF, 'calculator-results')

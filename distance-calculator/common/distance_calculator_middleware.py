@@ -20,10 +20,8 @@ class DistanceCalculatorMiddleware(Middleware):
         self.receive_data(callback, queue)
 
     def send_results(self, results, send_response_to):
-        self._channel.basic_publish(exchange='calculator-results',
-                                    routing_key=send_response_to,
-                                    body=results)
+        self.send(send_response_to, results, 'calculator-results')
 
     def send_eof(self):
         logging.info(f'action: eof_ack | result: sended')
-        self._channel.basic_publish(exchange='', routing_key='eof-manager', body=DISTANCE_CALCULATOR_ACK)
+        self.send_eof_ack(DISTANCE_CALCULATOR_ACK)
