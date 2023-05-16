@@ -1,5 +1,5 @@
 # Se agrega limite de CPU en el cliente en funcion de un tuneo de parametros en mi PC.
-CLIENT_CPU_LIMIT='0.7'
+CLIENT_CPU_LIMIT='0.75'
 
 DATA_PATH="./.data/archive"
 
