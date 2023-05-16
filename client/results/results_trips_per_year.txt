@@ -1,66 +1,5 @@
 Los nombres de las estaciones que al menos duplicaron la cantidad de viajes iniciados enellas entre 2016 y el 2017.
 Cantidad de estaciones: 213
-Ciudad: washington
-Estacion - Cantidad en 2016 - Cantidad en 2017
-14th & Irving St NW - 8321 - 22389
-17th St & Independence Ave SW - 13733 - 30088
-Vermont Ave & I St NW - 3307 - 9961
-Potomac & Swann Ave - 1186 - 3742
-4th St & Madison Dr NW - 18263 - 37751
-Mount Vernon Ave & Four Mile Run Park - 435 - 1617
-Franklin & S Washington St - 1031 - 2476
-New Jersey Ave & L St NW - 1368 - 4401
-East Falls Church Metro/Sycamore St & 19th St N - 616 - 1350
-22nd St & Constitution Ave NW - 1231 - 8268
-N Lynn St & Fairfax Dr - 292 - 5243
-1st & D St SE - 3204 - 13741
-Powhatan St & Bashford Ln - 607 - 1456
-Mount Vernon Ave & Bruce St - 195 - 500
-24th & R St NE / National Arboretum - 752 - 2794
-16th & Q St SE / Anacostia HS - 151 - 711
-Alabama & MLK Ave SE - 236 - 555
-6th & K St NE - 48 - 7595
-Wisconsin Ave & Brandywine St NW - 712 - 2847
-Library St & Freedom Dr - 35 - 429
-Benning Rd & East Capitol St NE / Benning Rd Metro - 304 - 656
-Kennebec St & 11th St N - 260 - 1275
-Radford & Osage St - 243 - 738
-Commonwealth & E Monroe Ave - 596 - 1308
-Madison & Fairfax St - 171 - 3271
-Lee Center - 469 - 1133
-Sligo Ave & Carroll Ln - 37 - 1158
-Benning Branch Library - 216 - 501
-12th St & Pennsylvania Ave SE - 47 - 4925
-Westpark & Jones Branch Dr - 53 - 667
-61st St & Banks Pl NE - 19 - 81
-Greensboro & International Dr - 15 - 174
-3rd St & Riggs Rd NE - 8 - 592
-Westpark & Park Run Dr - 34 - 250
-Reston Station - 201 - 2302
-Carlin Springs Rd & N Thomas St - 16 - 1720
-Reston Town Center Transit Station - 94 - 1381
-Solutions & Greensboro Dr - 13 - 29
-Broschart & Blackwell Rd - 16 - 34
-Needwood Rd & Eagles Head Ct - 77 - 419
-Monroe St & Monroe Pl - 177 - 371
-Temporary Rd & Old Reston Ave - 55 - 518
-Sunset Hills & Old Reston Ave - 106 - 770
-New Dominion Pkwy & Fountain Dr - 41 - 248
-Town Center Pkwy & Bowman Towne Dr - 49 - 210
-Reston YMCA - 34 - 335
-Tysons West Transit Center - 16 - 130
-Towers Crescent Dr & Tysons One Pl - 3 - 125
-Tysons Corner Station - 11 - 932
-Spring Hill Metro - 28 - 211
-Jones Branch & Westbranch Dr - 32 - 86
-Reston Regional Library - 18 - 53
-Westpark Dr & Leesburg Pike - 8 - 146
-Ciudad: montreal
-Estacion - Cantidad en 2016 - Cantidad en 2017
-Boyer / du Mont-Royal - 11366 - 24313
-St-Denis / de Maisonneuve - 4236 - 8884
-Marché Atwater - 11132 - 29159
-Jardin Botanique (Pie-IX / Sherbrooke) - 2915 - 8293
 Ciudad: toronto
 Estacion - Cantidad en 2016 - Cantidad en 2017
 Dundas St E / Regent Park Blvd - 4077 - 9993
@@ -193,12 +132,6 @@ Queen St W / Close Ave - 1381 - 3867
 Fort York Blvd / Garrison Rd - 1700 - 4916
 Strachan Ave / Princes' Blvd - 1601 - 5214
 Ontario Place Blvd / Remembrance Dr - 2767 - 14565
-Cherry St / Distillery Ln - 1469 - 4091
-Ulster St / Bathurst St - 1172 - 2976
-Queen St W / Cowan Ave - 782 - 2636
-Liberty St / Fraser Ave Green P - 1005 - 3234
-King St W / Douro St - 1345 - 3498
-Wellington St W / Stafford St - 748 - 2638
 Cariboo St / Rail Path - 475 - 2102
 Exhibition GO (Atlantic Ave) - 1092 - 3179
 Dufferin St / Sylvan Av (Dufferin Grove Park) - 700 - 2342
@@ -207,6 +140,12 @@ Roxton Rd / Harbord St - 833 - 2134
 King St W / Fraser Ave - 427 - 1343
 King St W / Joe Shuster Way - 759 - 3548
 Bridgeman Ave / Bathurst St - 390 - 1568
+Cherry St / Distillery Ln - 1469 - 4091
+Ulster St / Bathurst St - 1172 - 2976
+Queen St W / Cowan Ave - 782 - 2636
+Liberty St / Fraser Ave Green P - 1005 - 3234
+King St W / Douro St - 1345 - 3498
+Wellington St W / Stafford St - 748 - 2638
 Bridgeman Ave / Kendal Ave - 778 - 1697
 Bloor St W / Dundas St W - 818 - 2225
 Lansdowne Ave / Whytock Ave - 239 - 646
@@ -219,3 +158,64 @@ Mill St / Tannery Rd - 1062 - 2752
 Davenport Rd / Bathurst St - 407 - 1328
 Yarmouth Rd / Christie St - 907 - 2917
 Palmerston Ave / Vermont Ave - 944 - 2049
+Ciudad: montreal
+Estacion - Cantidad en 2016 - Cantidad en 2017
+Boyer / du Mont-Royal - 11366 - 24313
+St-Denis / de Maisonneuve - 4236 - 8884
+Marché Atwater - 11132 - 29159
+Jardin Botanique (Pie-IX / Sherbrooke) - 2915 - 8293
+Ciudad: washington
+Estacion - Cantidad en 2016 - Cantidad en 2017
+14th & Irving St NW - 8321 - 22389
+17th St & Independence Ave SW - 13733 - 30088
+Vermont Ave & I St NW - 3307 - 9961
+Potomac & Swann Ave - 1186 - 3742
+4th St & Madison Dr NW - 18263 - 37751
+Mount Vernon Ave & Four Mile Run Park - 435 - 1617
+Franklin & S Washington St - 1031 - 2476
+East Falls Church Metro/Sycamore St & 19th St N - 616 - 1350
+New Jersey Ave & L St NW - 1368 - 4401
+22nd St & Constitution Ave NW - 1231 - 8268
+N Lynn St & Fairfax Dr - 292 - 5243
+1st & D St SE - 3204 - 13741
+Powhatan St & Bashford Ln - 607 - 1456
+Mount Vernon Ave & Bruce St - 195 - 500
+24th & R St NE / National Arboretum - 752 - 2794
+16th & Q St SE / Anacostia HS - 151 - 711
+Alabama & MLK Ave SE - 236 - 555
+6th & K St NE - 48 - 7595
+Wisconsin Ave & Brandywine St NW - 712 - 2847
+Library St & Freedom Dr - 35 - 429
+Benning Rd & East Capitol St NE / Benning Rd Metro - 304 - 656
+Kennebec St & 11th St N - 260 - 1275
+Radford & Osage St - 243 - 738
+Commonwealth & E Monroe Ave - 596 - 1308
+Madison & Fairfax St - 171 - 3271
+Lee Center - 469 - 1133
+Sligo Ave & Carroll Ln - 37 - 1158
+Benning Branch Library - 216 - 501
+12th St & Pennsylvania Ave SE - 47 - 4925
+Westpark & Jones Branch Dr - 53 - 667
+61st St & Banks Pl NE - 19 - 81
+Greensboro & International Dr - 15 - 174
+3rd St & Riggs Rd NE - 8 - 592
+Westpark & Park Run Dr - 34 - 250
+Reston Station - 201 - 2302
+Carlin Springs Rd & N Thomas St - 16 - 1720
+Reston Town Center Transit Station - 94 - 1381
+Solutions & Greensboro Dr - 13 - 29
+Broschart & Blackwell Rd - 16 - 34
+Needwood Rd & Eagles Head Ct - 77 - 419
+Monroe St & Monroe Pl - 177 - 371
+Temporary Rd & Old Reston Ave - 55 - 518
+Sunset Hills & Old Reston Ave - 106 - 770
+New Dominion Pkwy & Fountain Dr - 41 - 248
+Town Center Pkwy & Bowman Towne Dr - 49 - 210
+Reston YMCA - 34 - 335
+Tysons West Transit Center - 16 - 130
+Towers Crescent Dr & Tysons One Pl - 3 - 125
+Tysons Corner Station - 11 - 932
+Reston Regional Library - 18 - 53
+Spring Hill Metro - 28 - 211
+Jones Branch & Westbranch Dr - 32 - 86
+Westpark Dr & Leesburg Pike - 8 - 146

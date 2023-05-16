@@ -45,7 +45,7 @@ echo "
     deploy:
       resources:
         limits:
-          cpus: $CLIENT_CPU_LIMIT
+          cpus: '$CLIENT_CPU_LIMIT'
 " >> docker-compose-dev.yaml
 
 
