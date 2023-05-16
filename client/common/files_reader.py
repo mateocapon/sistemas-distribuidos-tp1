@@ -123,7 +123,7 @@ class FilesReader:
         try:
             self._skt.shutdown(socket.SHUT_WR)
         except OSError as e:
-            logging.error(f'action: stop_reader | result: fail | error: {e}')
+            logging.error(f'action: stop_reader | result: fail | error: {str(e)}')
         except:
             logging.error(f'action: stop_reader | result: fail | error: unknown')
     

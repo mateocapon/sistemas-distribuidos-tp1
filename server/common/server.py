@@ -114,7 +114,7 @@ class Server:
             return c
         except OSError as e:
             if self._server_active:
-                logging.error(f'action: accept_connections | result: fail | error: {e}')
+                logging.error(f'action: accept_connections | result: fail | error: {str(e)}')
             return False
 
     def __stop_accepting(self, *args):
@@ -132,6 +132,6 @@ class Server:
             self._server_socket.shutdown(socket.SHUT_WR)
             logging.info('action: stop_server | result: success')
         except OSError as e:
-            logging.error(f'action: stop_server | result: fail | error: {e}')
+            logging.error(f'action: stop_server | result: fail | error: {str(e)}')
         except:
             logging.error(f'action: stop_server | result: fail | error: unknown')

@@ -45,7 +45,7 @@ class ClientHandler:
             except OSError as e:
                 error_encountered = True
                 workers_results.put(error_encountered)
-                logging.error(f'action: receive_message | result: fail | error: {e}')
+                logging.error(f'action: receive_message | result: fail | error: {str(e)}')
             finally:
                 if self._client_sock:
                     self._client_sock.close()
@@ -67,6 +67,6 @@ class ClientHandler:
             if self._client_sock:
                 self._client_sock.shutdown(socket.SHUT_WR)
         except OSError as e:
-            logging.error(f'action: stop_reader | result: fail | error: {e}')
+            logging.error(f'action: stop_reader | result: fail | error: {str(e)}')
         except:
             logging.error(f'action: stop_reader | result: fail | error: unknown')
