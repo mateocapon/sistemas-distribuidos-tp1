@@ -21,11 +21,13 @@ class DurationSerializer(Serializer):
 
     def decode_trips(self, chunk):
         trips_data = chunk[1:]
+        trips = []
         for i in range(0, len(trips_data), TRIP_DATA_LEN):
             date = trips_data[i:i+DATE_TRIP_LEN]
             duration = self.decode_float(trips_data[i+DATE_TRIP_LEN:i+DATE_TRIP_LEN+FLOAT_ENCODED_LEN])
-            yield date, duration
-
+            trips.append((date, duration))
+        return trips
+        
     def encode_results(self, average_durations):
         results = b''
         for key, value in average_durations.items():

@@ -63,9 +63,9 @@ class Middleware:
 
     def __del__(self):
         try:
-            if self._active_channel:
-                self._active_channel = False
-                self._channel.stop_consuming()
+            # if self._active_channel:
+            #     self._active_channel = False
+            #     self._channel.stop_consuming()
             if self._active_connection:
                 self._connection.close()
         except OSError as e:

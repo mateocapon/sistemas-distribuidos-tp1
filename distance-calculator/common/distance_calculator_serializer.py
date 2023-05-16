@@ -22,6 +22,7 @@ class DistanceCalculatorSerializer(Serializer):
         current_pos = TYPE_POS + TYPE_LEN + UINT16_SIZE + len(send_response_to)
         self._send_response_to = send_response_to.decode("utf-8")
         max_pos = len(body)
+        locations = []
         while current_pos < max_pos:
             init_latitude = self.decode_string_to_bytes(body[current_pos:])
             current_pos = current_pos + UINT16_SIZE + len(init_latitude)
@@ -37,8 +38,8 @@ class DistanceCalculatorSerializer(Serializer):
             # is irrelevant to calculator but relevant to the listener to send_response_to.
             other_irrelevant_trip_data = self.decode_string_to_bytes(body[current_pos:])
             current_pos = current_pos + UINT16_SIZE + len(other_irrelevant_trip_data)
-            yield init, end, other_irrelevant_trip_data
-
+            locations.append((init, end, other_irrelevant_trip_data)) 
+        return locations
 
     def add_result(self, distance, other_data):
         self._results = self._results + self.encode_float(distance) +\

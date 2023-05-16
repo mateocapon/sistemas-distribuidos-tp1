@@ -45,7 +45,7 @@ echo "
     deploy:
       resources:
         limits:
-          cpus: '0.70'
+          cpus: '0.35'
 " >> docker-compose-dev.yaml
 
 

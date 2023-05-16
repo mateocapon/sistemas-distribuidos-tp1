@@ -35,7 +35,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.70'
+          cpus: '0.35'
 
   
   server:
@@ -74,23 +74,6 @@ services:
 
   packet_distributor2:
     container_name: packet-distributor2
-    image: packet-distributor:latest
-    entrypoint: python3 /main.py
-    environment:
-      - PYTHONUNBUFFERED=1
-      - LOGGING_LEVEL=INFO
-      - FIRST_YEAR_COMPARE=2016
-      - SECOND_YEAR_COMPARE=2017
-      - CITY_TO_CALC_DISTANCE=montreal
-    networks:
-      - testing_net
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-
-  packet_distributor3:
-    container_name: packet-distributor3
     image: packet-distributor:latest
     entrypoint: python3 /main.py
     environment:
@@ -242,14 +225,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOGGING_LEVEL=INFO
-      - N_PACKET_DISTRIBUTOR=3
+      - N_PACKET_DISTRIBUTOR=2
       - CITIES=montreal,toronto,washington
       - N_WEATHER_FILTER_PER_CITY=2,1,2
       - N_STATIONS_JOINER_PER_CITY=2,1,2
       - NUMBER_AVERAGE_DURATION_PROCESSES=2
       - N_DISTANCES_JOIN_PARSER=1
       - DISTANCES_JOIN_PARSER_CITY=montreal
-      - N_DISTANCE_CALCULATOR=4
+      - N_DISTANCE_CALCULATOR=9
     networks:
       - testing_net
     depends_on:
@@ -457,6 +440,76 @@ services:
 
   distance-calculator-3:
     container_name: distance-calculator-3
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-4:
+    container_name: distance-calculator-4
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-5:
+    container_name: distance-calculator-5
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-6:
+    container_name: distance-calculator-6
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-7:
+    container_name: distance-calculator-7
+    image: distance-calculator:latest
+    entrypoint: python3 /main.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOGGING_LEVEL=INFO
+    networks:
+      - testing_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  distance-calculator-8:
+    container_name: distance-calculator-8
     image: distance-calculator:latest
     entrypoint: python3 /main.py
     environment:

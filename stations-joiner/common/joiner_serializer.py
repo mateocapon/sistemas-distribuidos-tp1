@@ -59,7 +59,7 @@ class JoinerSerializer(Serializer):
         self.send_response_to = send_response_to.decode("utf-8")
 
         trips_data = trips_data[RESPONSE_QUEUE_POS + UINT16_SIZE +len(send_response_to):]
-        
+        trips = []
         for trip_pos in range(0, len(trips_data), each_trip_len):
             current_trip = trips_data[trip_pos:trip_pos+each_trip_len]
             year_trip = self.decode_uint16(current_trip[:UINT16_SIZE])
@@ -68,7 +68,8 @@ class JoinerSerializer(Serializer):
             codes = []
             for i in range(number_codes_to_join):
                 codes.append(self.decode_uint16(current_trip[UINT16_SIZE+i*UINT16_SIZE:UINT16_SIZE+(i+1)*UINT16_SIZE]))
-            yield (current_trip, year_trip, codes, type_join)
+            trips.append((current_trip, year_trip, codes, type_join))
+        return trips
     
     def join_results(self, results):
         return TRIPS_PACKET+b''.join(results)

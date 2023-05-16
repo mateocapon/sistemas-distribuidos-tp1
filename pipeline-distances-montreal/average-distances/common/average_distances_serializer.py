@@ -15,12 +15,14 @@ class AverageDistancesSerializer(Serializer):
     def decode_trips(self, chunk):
         current_pos = 1
         max_pos = len(chunk)
+        trips = []
         while current_pos < max_pos:
             distance = self.decode_float(chunk[current_pos: current_pos+INT32_SIZE])
             current_pos = current_pos + INT32_SIZE # FLOAT SIZE ENCODED
             destination_station = self.decode_string_to_bytes(chunk[current_pos:])
             current_pos = current_pos + UINT16_SIZE + len(destination_station)
-            yield destination_station, distance
+            trips.append((destination_station, distance))
+        return trips 
 
 
     def add_result(self, station, average):

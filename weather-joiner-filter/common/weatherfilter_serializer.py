@@ -35,10 +35,12 @@ class WeatherFilterSerializer(Serializer):
 
     def decode_weather(self, chunk):
         weather_data = chunk[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
+        weathers = []
         for i in range(0, len(weather_data), WEATHER_IMPORTANT_DATA_LEN):
             date = self.__to_datetime(weather_data[i:i+DATE_WEATHER_LEN]) 
             prectot = self.decode_int32(weather_data[i+DATE_WEATHER_LEN:i+WEATHER_IMPORTANT_DATA_LEN])
-            yield date, prectot
+            weathers.append((date, prectot))
+        return weathers
 
     def __to_datetime(self, to_decode):
         date = to_decode.decode('utf-8')
@@ -56,10 +58,12 @@ class WeatherFilterSerializer(Serializer):
 
     def decode_trips(self, chunk):
         trips_data = chunk[NUMBER_CHUNK_SIZE + TYPE_SIZE:]
+        trips = []
         for i in range(0, len(trips_data), TRIP_DATA_LEN):
             trip = trips_data[i:i+TRIP_DATA_LEN]
             trip_date = datetime.date.fromisoformat(trip[:DATE_TRIP_LEN].decode('utf-8'))
-            yield trip, trip_date
+            trips.append((trip, trip_date))
+        return trips 
 
     def get_send_response_to(self, trip):
         sha256 = hashlib.sha256(trip[:DATE_TRIP_LEN])
