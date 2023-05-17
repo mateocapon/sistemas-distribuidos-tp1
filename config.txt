@@ -7,7 +7,7 @@ DATA_PATH="./.data/archive"
 CITIES="montreal,toronto,washington"
 
 # El proceso Distance Calculator se puede correr en modo 0 (esta separado el serializador del negocio), o como modo 1 (es aproximadamente un orden de magnitud mas eficiente)
-EFFICIENT_DC=1
+EFFICIENT_DC=0
 
 # el primer numero es la cantidad para la primera ciudad, el segundo para la segunda,etc.
 N_WEATHER_FILTER="2,1,2"

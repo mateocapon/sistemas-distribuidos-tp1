@@ -11,13 +11,13 @@ DISTANCE_CALCULATOR_ACK = b'P'
 class DistanceCalculatorSerializer(Serializer):
     def __init__(self):
         super().__init__()
-        self._results = DISTANCE_CALCULATOR_REPLY
 
 
     def is_eof(self, chunk):
         return DISTANCE_CALCULATOR_EOF[0] == chunk[TYPE_POS]
 
     def decode_locations(self, body):
+        self._results = DISTANCE_CALCULATOR_REPLY
         send_response_to = self.decode_string_to_bytes(body[TYPE_POS+TYPE_LEN:])
         current_pos = TYPE_POS + TYPE_LEN + UINT16_SIZE + len(send_response_to)
         self._send_response_to = send_response_to.decode("utf-8")
